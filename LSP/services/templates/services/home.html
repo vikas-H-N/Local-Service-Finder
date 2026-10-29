@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local Service Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#2563eb;--teal:#14b8a6;--ink:#14243b;--muted:#64748b;--line:#dfe7f0;--surface:#f5f8fc}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ink)}
+    h1,h2,.display{font-family:Fraunces,serif;letter-spacing:-.035em}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+    :focus-visible{outline:3px solid #14b8a6!important;outline-offset:3px}
+    .shell{width:100%;min-height:calc(100 * min(var(--vh, 1vh), 1vh));background:#f5f8fc}
+    .wrap{width:min(1180px,calc(100% - 40px));margin:auto}
+    .card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 36px rgba(19,46,82,.045)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 18px;border-radius:12px;font-weight:700;transition:transform .18s,box-shadow .18s,background .18s;border:1px solid transparent}
+    .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,.14)}
+    .primary{background:#2563eb;color:white}.secondary{background:#e7f8f5;color:#096b62}.outline{background:#fff;color:#14243b;border-color:#dfe7f0}
+    .input{width:100%;min-height:46px;border:1px solid #ccd8e5;border-radius:11px;background:white;padding:10px 13px;color:var(--ink)}
+    .input:focus{border-color:var(--blue);outline:2px solid #bfdbfe}
+    .tiny{font-size:12px}.muted{color:var(--muted)}.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:#087e75}
+    .pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:100px;background:#e8f7f3;color:#087469;font-size:12px;font-weight:800}
+    .badge{display:inline-flex;padding:5px 9px;border-radius:100px;background:#eaf1ff;color:#2256b1;font-size:12px;font-weight:700}
+    .navlink{border:0;background:transparent;padding:10px;color:#42546b;font-weight:700;border-radius:10px}
+    .navlink:hover,.navlink.active{background:#edf4ff;color:#2158c8}
+    .hero{background:linear-gradient(116deg,#e9f4ff 0%,#f4fbff 60%,#e4f9f3 100%);overflow:hidden}
+    .hero-photo{width:100%;height:390px;object-fit:cover;border-radius:25px;box-shadow:20px 20px 0 #ccece9}
+    .category:hover,.provider:hover{border-color:#9cc2fa;transform:translateY(-3px)}
+    .category,.provider{transition:transform .2s,border-color .2s}
+    .icon-tile{width:46px;height:46px;border-radius:14px;background:#e8f2ff;color:#2563eb;display:grid;place-items:center}
+    .avatar{width:65px;height:65px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(135deg,#dcecff,#c6f0e9);color:#1552a5;font-size:20px;font-weight:800;flex-shrink:0}
+    .field-error{min-height:18px;color:#b42318;font-size:12px;margin-top:4px}
+    .fade{animation:rise .35s both}@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .modal-backdrop{position:fixed;inset:0;z-index:80;background:rgba(15,35,58,.65);display:grid;place-items:center;padding:16px}
+    .modal-card{width:min(480px,100%);max-height:90%;overflow:auto}
+    .sidebar button{width:100%;text-align:left}.sidebar button.active{background:#eaf2ff;color:#205cc8}
+    .mobile-nav{display:none}
+    @media(max-width:800px){.desktop-nav{display:none!important}.mobile-nav.open{display:flex}.hero-photo{height:275px;box-shadow:10px 10px 0 #ccece9}.wrap{width:min(100% - 28px,1180px)}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  </head>
+ <body style="background: rgb(245, 248, 252);">
+  <div class="shell w-full">
+   <header class="canva-header bg-white border-b border-slate-200 sticky top-0 z-40" style="background: rgb(255, 255, 255);">
+    <div class="wrap flex items-center justify-between gap-3 py-3"><button type="button" data-route="home" class="flex items-center gap-2 text-left rounded-lg" aria-label="Local Service Finder home"> <span class="w-10 h-10 rounded-xl bg-blue-600 text-white grid place-items-center"><i data-lucide="map-pin-check" class="w-5 h-5"></i></span> <span class="canva-text font-extrabold tracking-tight" style="color: rgb(20, 36, 59); font-weight: 800; font-style: normal; font-size: 17px;">Local Service Finder</span> </button>
+     <nav class="desktop-nav flex items-center gap-1" aria-label="Main navigation"><button data-route="home" class="canva-button navlink" style="color: rgb(66, 84, 107); font-weight: 700; font-style: normal; font-size: 16px;">Home</button> <button data-route="results" class="canva-button navlink" style="color: rgb(66, 84, 107); font-weight: 700; font-style: normal; font-size: 16px;">Explore</button> <button data-route="customer" class="canva-button navlink" style="color: rgb(66, 84, 107); font-weight: 700; font-style: normal; font-size: 16px;">Customer</button> <button data-route="provider" class="canva-button navlink" style="color: rgb(66, 84, 107); font-weight: 700; font-style: normal; font-size: 16px;">Provider</button> <button data-route="admin" class="canva-button navlink" style="color: rgb(66, 84, 107); font-weight: 700; font-style: normal; font-size: 16px;">Admin</button>
+     </nav>
+     <div class="desktop-nav flex gap-2"><button data-route="login" class="canva-button btn outline" style="background: rgb(255, 255, 255); color: rgb(20, 36, 59); font-weight: 700; font-style: normal; font-size: 16px;">Login info</button> <button data-route="register" class="canva-button btn primary" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Sign-up info</button>
+     </div><button id="menu-toggle" type="button" class="md:hidden btn outline !p-2" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav"><i data-lucide="menu" class="w-6 h-6"></i></button>
+    </div>
+    <nav id="mobile-nav" class="mobile-nav flex-col px-4 pb-4 gap-1 border-t border-slate-100" aria-label="Mobile navigation"><button data-route="home" class="navlink text-left">Home</button><button data-route="results" class="navlink text-left">Find services</button> <button data-route="customer" class="navlink text-left">Customer dashboard</button><button data-route="provider" class="navlink text-left">Provider dashboard</button> <button data-route="admin" class="navlink text-left">Admin dashboard</button><button data-route="login" class="navlink text-left">Login</button> <button data-route="register" class="navlink text-left">Sign up</button>
+    </nav>
+   </header>
+   
+   <main id="app-view" class="w-full" tabindex="-1"></main>
+   <footer class="canva-footer bg-[#14243b] text-white mt-16" style="background: rgb(20, 36, 59);">
+    <div class="wrap py-10 flex flex-col md:flex-row justify-between gap-7">
+     <div>
+      <p class="canva-text font-extrabold" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Local Service Finder</p>
+      <p class="canva-text text-slate-300 mt-2 max-w-sm" style="color: rgb(203, 213, 225); font-weight: 400; font-style: normal; font-size: 16px;">A thoughtful marketplace concept for a college project. Browse the experience; every person and transaction shown is fictional.</p>
+     </div>
+     <div class="flex flex-wrap gap-3 items-start">
+      <button data-route="results" class="text-white hover:underline p-2">Explore</button><button data-route="customer" class="text-white hover:underline p-2">Customer demo</button><button data-route="provider" class="text-white hover:underline p-2">Provider demo</button><button data-route="admin" class="text-white hover:underline p-2">Admin demo</button>
+     </div>
+    </div>
+    <div class="wrap border-t border-slate-600 py-4">
+     <p class="canva-text text-slate-300 text-sm" style="color: rgb(203, 213, 225); font-weight: 400; font-style: normal; font-size: 14px;">Phase 1 frontend demo • Mock data only</p>
+    </div>
+   </footer>
+  </div>
+  <div id="modal-host"></div>
+  <script>
+(() => {
+  'use strict';
+  const categories=[
+    {name:'Electricians',icon:'zap'},{name:'Plumbers',icon:'droplets'},{name:'Mechanics',icon:'wrench'},
+    {name:'Carpenters',icon:'hammer'},{name:'Cleaners',icon:'sparkles'},{name:'Tutors',icon:'book-open'},
+    {name:'Other professionals',icon:'grid-2x2'}
+  ];
+  // Fictional records are separate from view markup, ready to replace with API responses.
+  const providers=[];
+  const state={view:'home',selected:1,query:'',location:'Bengaluru',category:'All',distance:'Any',rating:'Any',price:'Any',sort:'Recommended',map:false,
+    favorites:new Set([1]),bookings:[{id:'DEMO-1001',provider:3,service:'Home deep cleaning',date:'2026-10-22',time:'10:00',status:'Upcoming'}],
+    requests:[{id:'REQ-301',name:'Riya S.',service:'Electrical repairs',status:'Pending'},{id:'REQ-302',name:'Samir P.',service:'Lighting installation',status:'Pending'}],
+    adminTab:'Overview',customerTab:'Overview',providerTab:'Overview',role:'Customer',providerAvailable:true,
+    adminProviders:[{name:'Sana Ali',status:'Pending'},{name:'Dev Iyer',status:'Pending'}],
+    complaints:[{title:'Late arrival — demo report',status:'Open'}],disabledCategories:new Set(),
+    profileName:'Demo Customer',profileArea:'Bengaluru',providerPrice:650,notice:'',searchError:false};
+  const root=document.getElementById('app-view');
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money=n=>'₹'+Number(n).toLocaleString('en-IN');
+  const icon=(name,size=19)=>`<i data-lucide="${name}" style="width:${size}px;height:${size}px" aria-hidden="true"></i>`;
+  const refreshIcons=()=>{if(window.lucide)lucide.createIcons()};
+  const button=(label,action,cls='outline',extra='')=>`<button type="button" class="btn ${cls}" data-action="${action}" ${extra}>${label}</button>`;
+  const field=(id,label,value='',type='text',extra='')=>`<div><label for="${id}" class="block text-sm font-bold mb-2">${label}</label><input id="${id}" class="input" type="${type}" value="${esc(value)}" ${extra}><p id="${id}-error" class="field-error" aria-live="polite"></p></div>`;
+  function providerCard(p){
+    return `<article class="provider card p-5 flex flex-col gap-4" aria-label="${esc(p.name)} provider card">
+      <div class="flex gap-4 items-start"><div class="avatar" aria-label="Illustrated initials placeholder">${esc(p.name.split(' ').map(w=>w[0]).join(''))}</div>
+      <div class="min-w-0 flex-1"><div class="flex justify-between gap-2"><button class="text-left font-extrabold text-lg hover:text-blue-600" data-profile="${p.id}">${esc(p.name)}</button>
+      <button class="p-2 rounded-lg hover:bg-rose-50 ${state.favorites.has(p.id)?'text-rose-600':'text-slate-500'}" data-favorite="${p.id}" aria-label="${state.favorites.has(p.id)?'Remove '+esc(p.name)+' from':'Add '+esc(p.name)+' to'} favorites" aria-pressed="${state.favorites.has(p.id)}">${icon('heart')}</button></div>
+      <p class="text-sm muted">${esc(p.service)} · ${esc(p.area)}</p><div class="flex flex-wrap gap-2 mt-2">${p.verified?'<span class="pill">✓ Demo verified</span>':'<span class="badge">Verification pending</span>'}</div></div></div>
+      <div class="flex flex-wrap items-center justify-between gap-2 text-sm border-t border-slate-100 pt-4">
+      <span class="font-bold text-amber-700">★ ${p.rating.toFixed(1)} <span class="muted font-normal">(${p.reviews})</span></span>
+      <span class="muted">${p.distance.toFixed(1)} km · sample distance</span><span class="font-extrabold">From ${money(p.price)}</span></div>
+      <div class="flex flex-wrap gap-2">${button('View profile','profile:'+p.id,'primary flex-1')}${button('Contact','contact:'+p.id,'outline flex-1')}</div></article>`;
+  }
+  const intro=(eyebrow,title,description)=>`<div class="mb-8"><p class="eyebrow mb-2">${eyebrow}</p><h1 class="text-3xl md:text-4xl font-bold">${title}</h1><p class="muted mt-3 max-w-2xl">${description}</p></div>`;
+  const notice=()=>state.notice?`<div role="status" class="card p-4 mb-6 flex justify-between gap-3 border-teal-300 bg-teal-50"><span>${esc(state.notice)}</span><button data-action="clear-notice" aria-label="Dismiss message" class="p-1">${icon('x',17)}</button></div>`:'';
+  function searchForm(prefix='home'){
+    return `<form id="${prefix}-search" data-search-form class="card p-3 md:p-4 grid md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+      ${field(prefix+'-service','What service do you need?',state.query,'search','placeholder="Try electrician or cleaning"')}
+      ${field(prefix+'-location','Your area',state.location,'text','placeholder="City or neighborhood"')}
+      <button type="submit" class="btn primary h-[46px]">${icon('search')} Search providers</button>
+    </form>`;
+  }
+  function home(){
+    return `<section class="hero"><div class="wrap py-14 md:py-20 grid lg:grid-cols-[1.12fr_.88fr] gap-10 items-center">
+      <div class="fade"><span class="pill mb-5">✦ Demo data · Bengaluru</span>
+      <h1 class="canva-text font-bold text-[clamp(2.6rem,5.2vw,5rem)] leading-[1.08] max-w-[720px]"></h1>
+      <p class="canva-text text-slate-600 mt-5 text-lg max-w-xl"></p>
+      <div class="mt-8">${searchForm()}</div>
+      <button data-action="location" class="mt-4 inline-flex items-center gap-2 text-blue-700 font-bold hover:underline p-2">${icon('locate-fixed',17)} Use My Location</button>
+      <div class="mt-6 flex flex-wrap gap-5 text-sm text-slate-600"><span>✓ Compare sample ratings</span><span>✓ Explore clear pricing</span><span>✓ No account needed to browse</span></div>
+      </div><div class="relative fade"><img class="canva-image hero-photo" loading="lazy"><div class="absolute bottom-4 left-4 card px-4 py-3 shadow-lg"><span class="text-amber-600">★★★★★</span><p class="font-bold text-sm">Find your next local pro</p><p class="tiny muted">Marketplace concept · demo only</p></div></div></div></section>
+      <div class="wrap py-16">${notice()}<div class="flex justify-between items-end mb-7 gap-3"><div><p class="eyebrow">Start exploring</p><h2 class="text-3xl font-bold mt-1">What can we help with?</h2></div><span class="badge">7 categories</span></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">${categories.map(c=>`<button data-category="${esc(c.name)}" class="category card p-4 text-left min-h-[135px] flex flex-col justify-between"><span class="icon-tile">${icon(c.icon,23)}</span><span class="font-bold text-sm mt-3">${esc(c.name)}</span></button>`).join('')}</div></div>
+      <section class="bg-white py-16"><div class="wrap"><div class="flex flex-wrap justify-between items-end gap-3 mb-7"><div><p class="eyebrow">People to discover</p><h2 class="text-3xl font-bold">Featured local professionals</h2><p class="muted mt-2">Fictional profiles and sample distances for this project.</p></div>${button('Explore all providers →','results','outline')}</div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">${providers.slice(0,3).map(providerCard).join('')}</div></div></section>
+      <section class="wrap py-16"><p class="eyebrow">A simpler way to get things done</p><h2 class="text-3xl font-bold mb-7">How it works</h2><div class="grid md:grid-cols-3 gap-5">${[['01','Search','Find a service and browse local sample profiles.'],['02','Compare','Review prices, experience, and sample feedback.'],['03','Book','Try a booking request and see a local confirmation.']].map(x=>`<div class="card p-7"><span class="text-blue-600 font-extrabold">${x[0]}</span><h3 class="text-xl font-bold mt-4">${x[1]}</h3><p class="muted mt-2">${x[2]}</p></div>`).join('')}</div></section>
+      <section class="bg-[#eaf6fa] py-16"><div class="wrap grid lg:grid-cols-2 gap-8 items-center"><div><p class="eyebrow">Built around clarity</p><h2 class="text-3xl font-bold mt-2">Your neighborhood, one search away.</h2><p class="muted mt-4">Explore transparent sample prices, useful profiles, and accessible booking flows in one place.</p></div><div class="grid sm:grid-cols-2 gap-4">${[['shield-check','Clear profile details'],['sliders-horizontal','Useful comparison tools'],['calendar-days','Simple request flow'],['heart','Favorites at a glance']].map(x=>`<div class="card p-5 flex gap-3 items-center"><span class="text-blue-600">${icon(x[0])}</span><strong>${x[1]}</strong></div>`).join('')}</div></div></section>
+      <section class="wrap py-16"><p class="eyebrow">Sample testimonials</p><h2 class="text-3xl font-bold mb-7">The experience, imagined</h2><div class="grid md:grid-cols-2 gap-5"><blockquote class="card p-7"><p class="text-lg">“It was easy to compare options before choosing a service.”</p><footer class="mt-5 font-bold">— Maya, fictional customer <span class="badge ml-2">Sample content</span></footer></blockquote><blockquote class="card p-7"><p class="text-lg">“The clear provider cards made browsing feel straightforward.”</p><footer class="mt-5 font-bold">— Kiran, fictional customer <span class="badge ml-2">Sample content</span></footer></blockquote></div></section>
+      ${styleGuide()}`;
+  }
+  function filtered(){
+    const q=state.query.trim().toLowerCase();
+    let list=providers.filter(p=>(!q||[p.name,p.category,p.service,...p.skills].join(' ').toLowerCase().includes(q))&&
+      (state.category==='All'||p.category===state.category)&&
+      (state.distance==='Any'||p.distance<=Number(state.distance))&&
+      (state.rating==='Any'||p.rating>=Number(state.rating))&&
+      (state.price==='Any'||p.price<=Number(state.price))&&!state.disabledCategories.has(p.category));
+    if(state.sort==='Nearest')list.sort((a,b)=>a.distance-b.distance);
+    else if(state.sort==='Highest rated')list.sort((a,b)=>b.rating-a.rating);
+    else list.sort((a,b)=>(b.rating*20+b.reviews/20-a.distance)-(a.rating*20+a.reviews/20-b.distance));
+    return list;
+  }
+  function results(){
+    const list=filtered();
+    return `<div class="wrap py-10 fade">${intro('Explore services','Find your local match','Fictional professionals, sample distances, and demo-only interactions.')}${notice()}${searchForm('results')}
+      <div class="grid lg:grid-cols-[260px_1fr] gap-6 mt-7"><aside class="card p-5 h-fit"><h2 class="font-extrabold text-lg mb-5">Filters</h2>
+      ${select('filter-category','Category',['All',...categories.map(c=>c.name)],state.category)}
+      ${select('filter-distance','Maximum distance',['Any','3','5','10'],state.distance,v=>v==='Any'?v:v+' km')}
+      ${select('filter-rating','Minimum rating',['Any','4.5','4.7','4.9'],state.rating,v=>v==='Any'?v:v+'+ stars')}
+      ${select('filter-price','Maximum starting price',['Any','600','750','900'],state.price,v=>v==='Any'?v:'₹'+v)}
+      ${button('Reset filters','reset-filters','outline w-full mt-2')}</aside>
+      <div><div class="flex flex-wrap items-center justify-between gap-3 mb-5"><div><h2 class="font-extrabold text-xl">${list.length} providers found</h2><p class="muted text-sm">Near ${esc(state.location||'Bengaluru')} · sample distances</p></div>
+      <div class="flex gap-2 items-end flex-wrap">${select('sort','Sort by',['Recommended','Nearest','Highest rated'],state.sort)}
+      <div class="flex border border-slate-200 rounded-xl p-1 bg-white self-end"><button data-action="list" class="btn !min-h-[38px] !px-3 ${state.map?'outline':'primary'}" aria-pressed="${!state.map}">List</button><button data-action="map" class="btn !min-h-[38px] !px-3 ${state.map?'primary':'outline'}" aria-pressed="${state.map}">Map</button></div></div></div>
+      ${state.searchError?`<div role="alert" class="card p-5 border-red-200 bg-red-50 mb-4 flex justify-between gap-3"><span>Search could not be completed. Please try a different service.</span><button data-action="clear-error" aria-label="Dismiss error">${icon('x')}</button></div>`:''}
+      ${state.map?`<section aria-label="Static demo map" class="card p-7 min-h-[360px] flex flex-col items-center justify-center text-center bg-[radial-gradient(circle_at_40%_40%,#d4f4ef,#eaf2ff)]"><span class="icon-tile mb-5">${icon('map',25)}</span><h3 class="text-xl font-bold">Static demo map placeholder</h3><p class="muted mt-2 max-w-md">No live map, GPS, or provider positions are available in this frontend demo. Switch to List to browse ${list.length} matches.</p></section>`:
+      list.length?`<div class="grid md:grid-cols-2 gap-4">${list.map(providerCard).join('')}</div>`:
+      `<div class="card p-12 text-center"><div class="icon-tile mx-auto mb-4">${icon('search-x')}</div><h3 class="text-xl font-bold">No providers found</h3><p class="muted mt-2">Try a broader service, distance, or price range.</p>${button('Clear search and filters','clear-search','primary mt-5')}</div>`}</div></div></div>`;
+  }
+  function select(id,label,options,value,formatter=x=>x){
+    return `<div class="${id==='sort'?'min-w-[170px]':'mb-4'}"><label for="${id}" class="block text-sm font-bold mb-2">${label}</label><select id="${id}" class="input">${options.map(x=>`<option value="${esc(x)}" ${x===value?'selected':''}>${esc(formatter(x))}</option>`).join('')}</select></div>`;
+  }
+  function profile(){
+    const p=providers.find(x=>x.id===state.selected)||providers[0];
+    return `<div class="wrap py-10 fade"><button data-action="results" class="text-blue-700 font-bold mb-6 p-2">← Back to results</button>${notice()}
+      <div class="grid lg:grid-cols-[1fr_320px] gap-6"><div class="space-y-6">
+      <section class="card p-7"><div class="flex flex-wrap gap-5 items-center"><div class="avatar !w-24 !h-24 !text-3xl" aria-label="Illustrated initials placeholder">${esc(p.name.split(' ').map(w=>w[0]).join(''))}</div>
+      <div><p class="eyebrow">${esc(p.category)}</p><h1 class="text-3xl font-bold">${esc(p.name)}</h1><p class="muted">${esc(p.service)} · ${esc(p.area)}</p><div class="flex gap-2 mt-3"><span class="badge">★ ${p.rating.toFixed(1)} (${p.reviews} sample reviews)</span>${p.verified?'<span class="pill">✓ Demo verified</span>':'<span class="badge">Verification pending</span>'}</div></div></div>
+      <p class="mt-6 muted">A fictional professional profile created for this college-project demonstration. ${p.experience} years of sample experience and ${p.distance} km sample distance.</p></section>
+      <section class="card p-7"><h2 class="text-2xl font-bold">Services & skills</h2><p class="mt-4 font-bold">${esc(p.service)}</p><div class="flex flex-wrap gap-2 mt-4">${p.skills.map(s=>`<span class="badge">${esc(s)}</span>`).join('')}</div><p class="muted mt-5">Service area: ${esc(p.area)}, Bengaluru · Availability: ${esc(p.availability)} (sample)</p></section>
+      <section class="card p-7"><h2 class="text-2xl font-bold">Work inspiration</h2><p class="muted mt-2 mb-4">Stock examples; these do not depict this provider’s actual work.</p>
+      <div class="grid grid-cols-2 gap-3"><img class="canva-image w-full h-44 object-cover rounded-xl" loading="lazy"><img class="canva-image w-full h-44 object-cover rounded-xl" loading="lazy"></div></section>
+      <section class="card p-7"><h2 class="text-2xl font-bold">Sample reviews</h2><div class="mt-4 border-t pt-4"><strong>★★★★★ · Thoughtful and punctual</strong><p class="muted mt-2">“A straightforward experience from start to finish.” — Fictional customer</p></div></section></div>
+      <aside class="card p-6 h-fit lg:sticky lg:top-24"><p class="eyebrow">Starting at</p><p class="text-3xl font-extrabold mt-2">${money(p.price)} <span class="text-sm font-normal muted">sample price</span></p><p class="muted text-sm mt-2">Final pricing and availability are not live.</p>
+      <div class="grid gap-2 mt-6">${button('Book service','book:'+p.id,'primary w-full')}${button('Contact provider','contact:'+p.id,'outline w-full')}${button(state.favorites.has(p.id)?'♥ Remove favorite':'♡ Save favorite','favorite:'+p.id,'secondary w-full')}</div></aside></div></div>`;
+  }
+  function booking(){
+    const p=providers.find(x=>x.id===state.selected)||providers[0];
+    const today=new Date().toISOString().slice(0,10);
+    return `<div class="wrap py-10 fade">${intro('Request a service','Plan a demo booking','This request stays in this page only. No provider is notified and no payment is taken.')}${notice()}
+      <div class="grid lg:grid-cols-[1fr_340px] gap-6"><form id="booking-form" class="card p-7 space-y-4" novalidate><h2 class="text-xl font-bold">Visit details</h2>
+      ${field('booking-date','Service date','','date',`min="${today}" required`)}
+      ${select('booking-time','Available demo time slots',['Choose a time','09:00','10:00','14:00','16:00'],'Choose a time')}
+      <p id="booking-time-error" class="field-error" aria-live="polite"></p>
+      <div><label for="booking-address" class="block text-sm font-bold mb-2">Service address</label><input id="booking-address" class="input" placeholder="Street and neighborhood" autocomplete="street-address" required><p id="booking-address-error" class="field-error" aria-live="polite"></p></div>
+      <div><label for="booking-notes" class="block text-sm font-bold mb-2">Additional instructions (optional)</label><textarea id="booking-notes" rows="3" class="input" placeholder="Anything helpful for the visit"></textarea></div>
+      <button type="submit" class="btn primary w-full">Confirm booking request</button></form>
+      <aside class="card p-7 h-fit"><h2 class="text-xl font-bold">Booking summary</h2><div class="border-b py-5"><p class="font-bold">${esc(p.service)}</p><p class="muted text-sm">${esc(p.name)} · ${esc(p.area)}</p></div><div class="flex justify-between py-5 font-bold"><span>Sample starting price</span><span>${money(p.price)}</span></div><p class="tiny muted">Illustrative estimate only. No real booking or payment will be created.</p></aside></div></div>`;
+  }
+  function account(view){
+    const titles={login:'Login',register:'Create an account',forgot:'Password help'};
+    return `<div class="wrap py-16 fade"><div class="card max-w-xl mx-auto p-8 md:p-10"><span class="pill mb-5">Demo only · no authentication</span><h1 class="text-3xl font-bold">${titles[view]}</h1>
+      <p class="muted mt-4">Real authentication is not available in this frontend demo. Do not enter passwords or personal credentials here; nothing is sent or stored.</p>
+      ${view==='register'?`<fieldset class="mt-7"><legend class="font-bold mb-3">Explore as</legend><div class="grid grid-cols-2 gap-3">
+      ${['Customer','Provider'].map(r=>`<button type="button" data-role="${r}" aria-pressed="${state.role===r}" class="btn ${state.role===r?'primary':'outline'}">${r}</button>`).join('')}</div></fieldset>
+      <p class="muted text-sm mt-4">Selected demo role: <strong>${state.role}</strong>. Open its sample dashboard to explore available features.</p>${button('Explore '+state.role.toLowerCase()+' dashboard','dashboard-role','primary mt-6 w-full')}`:
+      view==='login'?`${button('Explore customer demo','customer','primary mt-7 w-full')}${button('Explore provider demo','provider','outline mt-3 w-full')}`:
+      `<p class="mt-5 text-sm bg-blue-50 rounded-xl p-4">Password reset cannot be performed here. A future production app would handle this securely through its authentication service.</p>`}
+      <div class="flex flex-wrap gap-3 mt-6 text-sm"><button data-route="login" class="text-blue-700 font-bold p-2">Login information</button><button data-route="register" class="text-blue-700 font-bold p-2">Registration information</button><button data-route="forgot" class="text-blue-700 font-bold p-2">Password help</button></div></div></div>`;
+  }
+  const sidebar=(items,active,prefix)=>`<nav class="sidebar card p-3 h-fit" aria-label="${prefix} dashboard sections">${items.map(t=>`<button type="button" data-tab="${prefix}:${esc(t)}" class="navlink ${active===t?'active':''}" aria-current="${active===t?'page':'false'}">${esc(t)}</button>`).join('')}</nav>`;
+  const stat=(title,value)=>`<div class="card p-5"><p class="muted text-sm">${esc(title)}</p><p class="font-extrabold text-2xl mt-2">${esc(value)}</p></div>`;
+  function customer(){
+    const t=state.customerTab;
+    let content='';
+    if(t==='Overview')content=`<div class="grid sm:grid-cols-3 gap-4">${stat('Favorite providers',state.favorites.size)}${stat('Bookings',state.bookings.length)}${stat('Upcoming appointments',state.bookings.filter(b=>b.status==='Upcoming').length)}</div><div class="card p-6 mt-5"><h2 class="text-xl font-bold">Next steps</h2><p class="muted mt-2">Discover a professional, save a favorite, or try a booking request.</p>${button('Browse providers','results','primary mt-5')}</div>`;
+    if(t==='Profile')content=`<form id="profile-form" class="card p-6 space-y-4"><h2 class="text-xl font-bold">Profile</h2>${field('profile-name','Display name',state.profileName)}${field('profile-area','Area',state.profileArea)}<button class="btn primary" type="submit">Save local changes</button></form>`;
+    if(t==='Favorites')content=state.favorites.size?`<div class="grid md:grid-cols-2 gap-4">${providers.filter(p=>state.favorites.has(p.id)).map(providerCard).join('')}</div>`:empty('No saved providers','Use the heart on any provider card to add a favorite.');
+    if(t==='Bookings'||t==='Appointments')content=state.bookings.length?`<div class="space-y-3">${state.bookings.filter(b=>t==='Bookings'||b.status==='Upcoming').map(b=>`<article class="card p-5 flex flex-wrap justify-between gap-4"><div><h2 class="font-bold">${esc(b.service)}</h2><p class="muted text-sm">${esc(b.date)} · ${esc(b.time)} · ${esc(providers.find(p=>p.id===b.provider)?.name)}</p><p class="tiny muted">Ref ${esc(b.id)} · demo only</p></div><div class="flex gap-2 items-center"><span class="badge">${esc(b.status)}</span>${b.status==='Upcoming'?button('Cancel booking request','cancel-booking:'+b.id,'outline'):''}</div></article>`).join('')}</div>`:empty('Nothing here yet','Your demo appointments will appear here.');
+    if(t==='Reviews')content=`<div class="card p-6"><h2 class="text-xl font-bold">Your sample reviews</h2><p class="muted mt-3">★★★★★ · “Clear communication and a useful service overview.”</p><p class="tiny muted mt-2">Fictional review for interface demonstration.</p></div>`;
+    return `<div class="wrap py-10 fade">${intro('Customer space','Your dashboard','Explore your sample activity. Changes last only until this page is refreshed.')}${notice()}<div class="grid lg:grid-cols-[230px_1fr] gap-6">${sidebar(['Overview','Profile','Favorites','Bookings','Appointments','Reviews'],t,'customer')}<section aria-label="${esc(t)}">${content}</section></div></div>`;
+  }
+  function empty(title,copy){return `<div class="card p-10 text-center"><h2 class="text-xl font-bold">${title}</h2><p class="muted mt-2">${copy}</p></div>`}
+  function providerDashboard(){
+    const t=state.providerTab;
+    let content='';
+    if(t==='Overview')content=`<div class="grid sm:grid-cols-3 gap-4">${stat('Sample rating','4.9 / 5')}${stat('Completed jobs','28')}${stat('Pending requests',state.requests.filter(r=>r.status==='Pending').length)}</div><div class="card p-6 mt-5"><h2 class="text-xl font-bold">Availability</h2><p class="muted mt-2">Locally toggle your demo availability.</p><button data-action="availability" aria-pressed="${state.providerAvailable}" class="btn ${state.providerAvailable?'secondary':'outline'} mt-4">${state.providerAvailable?'Available for requests':'Currently unavailable'}</button></div>`;
+    if(t==='Profile & pricing')content=`<form id="provider-form" class="card p-6 space-y-4"><h2 class="text-xl font-bold">Service settings</h2><p class="muted">Demo provider: Aarav Mehta · Electrical repairs</p>${field('provider-price','Starting price in rupees',state.providerPrice,'number','min="1" required')}<button type="submit" class="btn primary">Save local price</button></form>`;
+    if(t==='Requests')content=`<div class="space-y-3">${state.requests.map((r,i)=>`<div class="card p-5 flex flex-wrap justify-between gap-3"><div><strong>${esc(r.name)}</strong><p class="muted text-sm">${esc(r.service)} · ${esc(r.id)}</p></div><div class="flex gap-2 items-center"><span class="badge">${esc(r.status)}</span>${r.status==='Pending'?`${button('Accept','request:'+i+':Accepted','secondary')}${button('Reject','request:'+i+':Rejected','outline')}`:''}</div></div>`).join('')}</div>`;
+    if(t==='Appointments')content=`<div class="card p-6"><h2 class="text-xl font-bold">Demo appointments</h2><p class="muted mt-3">Thursday, 22 October · 10:00 · Lighting consultation</p><span class="badge mt-3">Sample scheduled</span></div>`;
+    if(t==='Completed jobs')content=`<div class="card p-6"><h2 class="text-xl font-bold">Completed jobs</h2><p class="muted mt-3">28 fictional completed jobs · 12 this month</p></div>`;
+    if(t==='Reviews')content=`<div class="card p-6"><h2 class="text-xl font-bold">Sample feedback</h2><p class="mt-3">★★★★★ “Helpful, careful, and professional.”</p><p class="tiny muted mt-2">Fictional customer feedback.</p></div>`;
+    return `<div class="wrap py-10 fade">${intro('Provider workspace','Grow your local presence','Manage a fictional provider account with local-only demo controls.')}${notice()}<div class="grid lg:grid-cols-[230px_1fr] gap-6">${sidebar(['Overview','Profile & pricing','Requests','Appointments','Completed jobs','Reviews'],t,'provider')}<section aria-label="${esc(t)}">${content}</section></div></div>`;
+  }
+  function admin(){
+    const tabs=['Overview','Customers','Providers','Verification','Categories','Bookings','Complaints'];
+    let content='';
+    if(state.adminTab==='Overview')content=`<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">${stat('Mock customers','24')}${stat('Mock providers',providers.length)}${stat('Bookings',state.bookings.length+41)}${stat('Open complaints',state.complaints.filter(c=>c.status==='Open').length)}</div><p class="muted mt-5">All statistics are fictional demonstration figures.</p>`;
+    if(state.adminTab==='Customers')content=`<div class="card p-6"><h2 class="text-xl font-bold">Sample customers</h2><div class="mt-4 divide-y">${['Maya R.','Kiran P.','Riya S.'].map(n=>`<div class="py-3 flex justify-between"><span>${n}</span><span class="badge">Demo active</span></div>`).join('')}</div></div>`;
+    if(state.adminTab==='Providers')content=`<div class="card p-6"><h2 class="text-xl font-bold">Provider directory</h2><div class="mt-4 divide-y">${providers.map(p=>`<div class="py-3 flex justify-between gap-3"><span>${esc(p.name)} · ${esc(p.category)}</span><span class="badge">${p.verified?'Demo verified':'Pending'}</span></div>`).join('')}</div></div>`;
+    if(state.adminTab==='Verification')content=`<div class="space-y-3">${state.adminProviders.map((p,i)=>`<div class="card p-5 flex justify-between items-center gap-3"><div><strong>${esc(p.name)}</strong><p class="muted text-sm">${esc(p.status)} · fictional request</p></div>${p.status==='Pending'?button('Approve booking request','approve:'+i,'primary'): '<span class="pill">✓ Approved locally</span>'}</div>`).join('')}</div>`;
+    if(state.adminTab==='Categories')content=`<div class="card p-6"><h2 class="text-xl font-bold">Service categories</h2><p class="muted text-sm mt-1">Toggle visibility in the demo search results.</p><div class="mt-4 divide-y">${categories.map((c,i)=>`<div class="py-3 flex justify-between items-center gap-3"><span>${esc(c.name)}</span><button data-action="category-toggle:${i}" aria-pressed="${!state.disabledCategories.has(c.name)}" class="btn ${state.disabledCategories.has(c.name)?'outline':'secondary'}">${state.disabledCategories.has(c.name)?'Show':'Visible'}</button></div>`).join('')}</div></div>`;
+    if(state.adminTab==='Bookings')content=`<div class="space-y-3">${state.bookings.map(b=>`<div class="card p-5 flex justify-between gap-3"><span>${esc(b.service)} · ${esc(b.date)}</span><span class="badge">${esc(b.status)} · demo</span></div>`).join('')}</div>`;
+    if(state.adminTab==='Complaints')content=`<div class="space-y-3">${state.complaints.map((c,i)=>`<div class="card p-5 flex justify-between items-center gap-3"><div><strong>${esc(c.title)}</strong><p class="muted text-sm">${esc(c.status)}</p></div>${c.status==='Open'?button('Mark reviewed','complaint:'+i,'secondary'):'<span class="pill">Reviewed locally</span>'}</div>`).join('')}</div>`;
+    return `<div class="wrap py-10 fade">${intro('Demo administration','Admin dashboard','Explore moderation and marketplace operations using fictional records only.')}${notice()}<div class="grid lg:grid-cols-[230px_1fr] gap-6">${sidebar(tabs,state.adminTab,'admin')}<section aria-label="${esc(state.adminTab)}">${content}</section></div></div>`;
+  }
+  function styleGuide(){
+    return `<aside class="wrap mb-4"><details class="card p-5"><summary class="font-bold cursor-pointer">Design-system notes · developer demo panel</summary>
+      <div class="grid md:grid-cols-3 gap-5 mt-5 text-sm"><div><strong>Color & typography</strong><p class="muted mt-2">Primary #2563EB · teal #14B8A6 · ink #14243B. Fraunces headings, DM Sans interface.</p></div>
+      <div><strong>Spacing & surfaces</strong><p class="muted mt-2">Consistent 8px rhythm, rounded cards, subtle borders, accessible focus rings.</p></div>
+      <div><strong>Component patterns</strong><p class="muted mt-2">Primary and secondary buttons, pill badges, labeled forms, inline errors, and status messages.</p></div></div>
+      <p class="tiny muted mt-4">Phase 1: frontend · Phase 2: API integration · Phase 3: production services. No future integration is active.</p></details></aside>`;
+  }
+  function render(){
+    root.innerHTML=({home,results,profile,booking,login:()=>account('login'),register:()=>account('register'),forgot:()=>account('forgot'),customer,provider:providerDashboard,admin}[state.view]||home)();
+    document.querySelectorAll('[data-route]').forEach(el=>{el.classList.toggle('active',el.dataset.route===state.view)});
+    refreshIcons();
+  }
+  function navigate(view){state.view=view;state.notice='';state.searchError=false;document.getElementById('mobile-nav').classList.remove('open');document.getElementById('menu-toggle').setAttribute('aria-expanded','false');render();window.scrollTo({top:0,behavior:'smooth'});root.focus({preventScroll:true})}
+  function message(text){state.notice=text;render()}
+  function contact(id){const p=providers.find(x=>x.id===id);if(!p)return;const host=document.getElementById('modal-host');host.innerHTML=`<div class="modal-backdrop" id="contact-overlay"><section role="dialog" aria-modal="true" aria-labelledby="contact-title" class="modal-card card p-7"><div class="flex justify-between items-start"><div><span class="pill">Demo contact</span><h2 id="contact-title" class="text-2xl font-bold mt-3">Contact ${esc(p.name)}</h2></div><button id="close-modal" aria-label="Close contact panel" class="p-2 rounded-lg hover:bg-slate-100">${icon('x')}</button></div><p class="muted mt-4">Messaging is not connected. This panel does not deliver messages or reveal real contact information.</p><p class="mt-5 bg-blue-50 p-4 rounded-xl text-sm">In a future production app, contact requests would be delivered through a secure messaging service.</p><button id="modal-done" class="btn primary mt-6 w-full">Done</button></section></div>`;refreshIcons();host.querySelector('#close-modal').onclick=closeModal;host.querySelector('#modal-done').onclick=closeModal;host.querySelector('#contact-overlay').onclick=e=>{if(e.target.id==='contact-overlay')closeModal()};host.querySelector('#close-modal').focus()}
+  function closeModal(){document.getElementById('modal-host').innerHTML=''}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+  document.addEventListener('click',e=>{
+    const route=e.target.closest('[data-route]');if(route){navigate(route.dataset.route);return}
+    const cat=e.target.closest('[data-category]');if(cat){state.category=cat.dataset.category;state.query='';navigate('results');return}
+    const profile=e.target.closest('[data-profile]');if(profile){state.selected=Number(profile.dataset.profile);navigate('profile');return}
+    const fav=e.target.closest('[data-favorite]');if(fav){toggleFavorite(Number(fav.dataset.favorite));return}
+    const tab=e.target.closest('[data-tab]');if(tab){const [view,name]=tab.dataset.tab.split(':');state[view==='customer'?'customerTab':view==='provider'?'providerTab':'adminTab']=name;render();return}
+    const role=e.target.closest('[data-role]');if(role){state.role=role.dataset.role;render();return}
+    const el=e.target.closest('[data-action]');if(!el)return;
+    const [action,arg,extra]=el.dataset.action.split(':');
+    if(action==='profile'){state.selected=Number(arg);navigate('profile')}
+    else if(action==='book'){state.selected=Number(arg);navigate('booking')}
+    else if(action==='contact')contact(Number(arg));
+    else if(action==='favorite')toggleFavorite(Number(arg));
+    else if(action==='location')message('Location access is not active in this demo. Enter a neighborhood to explore sample results.');
+    else if(action==='results'||action==='customer'||action==='provider'||action==='admin')navigate(action);
+    else if(action==='dashboard-role')navigate(state.role.toLowerCase());
+    else if(action==='clear-notice'){state.notice='';render()}
+    else if(action==='clear-error'){state.searchError=false;render()}
+    else if(action==='list'||action==='map'){state.map=action==='map';render()}
+    else if(action==='reset-filters'){Object.assign(state,{category:'All',distance:'Any',rating:'Any',price:'Any'});render()}
+    else if(action==='clear-search'){Object.assign(state,{query:'',category:'All',distance:'Any',rating:'Any',price:'Any'});render()}
+    else if(action==='cancel-booking'){const b=state.bookings.find(x=>x.id===arg);if(b)b.status='Cancelled';message('Demo request cancelled locally.')}
+    else if(action==='availability'){state.providerAvailable=!state.providerAvailable;render()}
+    else if(action==='request'){state.requests[Number(arg)].status=extra;message('Request '+extra.toLowerCase()+' in demo state.')}
+    else if(action==='approve'){state.adminProviders[Number(arg)].status='Approved';message('Verification approved locally for demo purposes.')}
+    else if(action==='complaint'){state.complaints[Number(arg)].status='Reviewed';message('Complaint marked reviewed locally.')}
+    else if(action==='category-toggle'){const name=categories[Number(arg)].name;state.disabledCategories.has(name)?state.disabledCategories.delete(name):state.disabledCategories.add(name);render()}
+  });
+  function toggleFavorite(id){state.favorites.has(id)?state.favorites.delete(id):state.favorites.add(id);render()}
+  document.addEventListener('change',e=>{
+    const values={'filter-category':'category','filter-distance':'distance','filter-rating':'rating','filter-price':'price','sort':'sort'};
+    if(values[e.target.id]){state[values[e.target.id]]=e.target.value;render()}
+  });
+  function error(id,text){const el=document.getElementById(id+'-error');if(el)el.textContent=text;const input=document.getElementById(id);if(input)input.setAttribute('aria-invalid',text?'true':'false')}
+  document.addEventListener('submit',e=>{
+    e.preventDefault();const form=e.target;
+    if(form.matches('[data-search-form]')){
+      const prefix=form.id.replace('-search',''),q=document.getElementById(prefix+'-service').value.trim(),location=document.getElementById(prefix+'-location').value.trim();
+      error(prefix+'-location',location?'':'Enter a city or neighborhood.');if(!location)return;
+      state.query=q;state.location=location;state.category='All';state.searchError=false;
+      root.innerHTML='<div class="wrap py-20 text-center" role="status" aria-live="polite"><div class="inline-block w-9 h-9 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div><p class="mt-4 font-bold">Finding demo providers…</p></div>';
+      setTimeout(()=>navigate('results'),380);
+    } else if(form.id==='booking-form'){
+      const date=document.getElementById('booking-date').value,time=document.getElementById('booking-time').value,address=document.getElementById('booking-address').value.trim();
+      const today=new Date();today.setHours(0,0,0,0);
+      const validDate=date&&new Date(date+'T00:00:00')>=today;
+      error('booking-date',validDate?'':'Choose today or a future date.');
+      error('booking-time',time!=='Choose a time'?'':'Choose a time slot.');
+      error('booking-address',address.length>=6?'':'Enter a service address of at least 6 characters.');
+      if(!validDate||time==='Choose a time'||address.length<6)return;
+      const p=providers.find(x=>x.id===state.selected)||providers[0];
+      const id='DEMO-'+String(Date.now()).slice(-6);
+      state.bookings.unshift({id,provider:p.id,service:p.service,date,time,status:'Upcoming'});
+      state.customerTab='Bookings';navigate('customer');message('Demo request '+id+' recorded in this page only. No provider was notified and no payment was taken.');
+    } else if(form.id==='profile-form'){
+      const name=document.getElementById('profile-name').value.trim(),area=document.getElementById('profile-area').value.trim();
+      error('profile-name',name?'':'Enter a display name.');error('profile-area',area?'':'Enter an area.');
+      if(!name||!area)return;state.profileName=name;state.profileArea=area;message('Profile updated locally.');
+    } else if(form.id==='provider-form'){
+      const value=Number(document.getElementById('provider-price').value);
+      error('provider-price',value>0?'':'Enter a price greater than zero.');
+      if(value<=0)return;state.providerPrice=value;providers[0].price=value;message('Sample starting price updated locally.');
+    }
+  });
+  document.getElementById('menu-toggle').addEventListener('click',()=>{
+    const nav=document.getElementById('mobile-nav'),open=nav.classList.toggle('open');
+    document.getElementById('menu-toggle').setAttribute('aria-expanded',String(open));
+    document.getElementById('menu-toggle').setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');
+  });
+  document.getElementById('dismiss-banner').addEventListener('click',()=>document.getElementById('demo-banner').remove());
+  render();
+})();
+</script>
+ 
+</body></html>

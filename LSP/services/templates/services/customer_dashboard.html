@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Dashboard | Local Service Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root { --blue:#2563eb; --teal:#14b8a6; --ink:#17253d; --muted:#64748b; --line:#e3eaf2; }
+    * { box-sizing:border-box }
+    body { margin:0; font-family:"DM Sans",sans-serif; color:var(--ink); }
+    button,input,select,textarea { font:inherit }
+    button { cursor:pointer }
+    :focus-visible { outline:3px solid #14b8a6; outline-offset:3px }
+    .surface { background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:0 8px 28px rgba(25,52,90,.045) }
+    .nav-btn { color:#64748b; padding:10px 15px; border-radius:12px; font-weight:700; white-space:nowrap }
+    .nav-btn.active { background:#eaf1ff; color:#2563eb }
+    .nav-btn:hover:not(.active) { background:#f1f5f9 }
+    .primary { background:#2563eb; color:white; padding:10px 16px; border-radius:11px; font-weight:700 }
+    .primary:hover { background:#1d4ed8 }
+    .secondary { border:1px solid #cfdaea; background:white; color:#2563eb; padding:9px 14px; border-radius:11px; font-weight:700 }
+    .secondary:hover { background:#eff6ff }
+    .danger { color:#be123c; border:1px solid #fecdd3; background:white; padding:9px 14px; border-radius:11px; font-weight:700 }
+    .danger:hover { background:#fff1f2 }
+    .field { width:100%; border:1px solid #cbd5e1; background:white; border-radius:11px; padding:11px 13px; color:#17253d }
+    .field[aria-invalid="true"] { border-color:#e11d48 }
+    .field-label { display:block; font-weight:700; margin-bottom:7px; font-size:14px }
+    .pill { padding:5px 10px; border-radius:100px; font-size:12px; font-weight:800; white-space:nowrap }
+    .pill-confirmed { background:#dcfce7; color:#166534 }
+    .pill-completed { background:#e0f2fe; color:#075985 }
+    .pill-cancelled { background:#ffe4e6; color:#9f1239 }
+    .view[hidden], [hidden] { display:none!important }
+    .fade { animation:rise .45s both }
+    @keyframes rise { from {opacity:0;transform:translateY(10px)} to {opacity:1;transform:translateY(0)} }
+    dialog { border:0; padding:0; max-width:min(520px,calc(100% - 32px)); width:100%; border-radius:22px; box-shadow:0 24px 80px #10223c55 }
+    dialog::backdrop { background:#0b1935a8 }
+    @media(max-width:780px) { .desktop-nav {display:none!important} .mobile-trigger {display:inline-flex!important} }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  </head>
+ <body class="w-full min-h-screen" style="background: rgb(247, 249, 252);">
+  <header class="canva-header bg-white border-b border-slate-200" style="background: rgb(255, 255, 255);">
+   <div class="w-full max-w-7xl mx-auto px-4 sm:px-7 py-4 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0"><span aria-hidden="true" class="grid place-items-center bg-blue-600 text-white rounded-xl w-10 h-10 font-extrabold">L</span> <span class="canva-text font-extrabold tracking-tight truncate" style="color: rgb(23, 37, 61); font-weight: 800; font-style: normal; font-size: 18px;">Local Service Finder</span>
+    </div>
+    <nav aria-label="Main navigation" class="desktop-nav flex items-center gap-1"><button type="button" class="nav-btn active" data-view="overview" style="color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">Overview</button> <button type="button" class="nav-btn" data-view="history" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Bookings</button> <button type="button" class="nav-btn" data-view="favorites" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Favorites</button> <button type="button" class="nav-btn" data-view="reviews" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Reviews</button>
+    </nav>
+    <div class="flex items-center gap-2 relative"><button type="button" id="notifications-trigger" aria-label="Notifications" aria-expanded="false" aria-controls="notifications-popover" class="secondary !p-2.5 relative">♧<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-teal-500"></span></button> <button type="button" id="profile-trigger" aria-expanded="false" aria-controls="profile-popover" class="secondary !p-2.5 flex gap-2 items-center"><span aria-hidden="true">◉</span><span class="canva-text hidden sm:inline" style="color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">My account</span></button> <button type="button" id="mobile-trigger" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav" class="mobile-trigger secondary !p-2.5 hidden">☰</button>
+     <div id="notifications-popover" hidden="" class="absolute z-20 top-14 right-12 surface p-4 w-64"><strong class="canva-text block mb-2" style="color: rgb(23, 37, 61); font-weight: 400; font-style: normal; font-size: 16px;">Notifications · Demo</strong>
+      <p class="canva-text text-sm text-slate-600" style="color: rgb(71, 85, 105); font-weight: 400; font-style: normal; font-size: 16px;">Your sample appointment is coming up. No real alerts are sent.</p>
+     </div>
+     <div id="profile-popover" hidden="" class="absolute z-20 top-14 right-0 surface p-2 w-44"><button type="button" data-view="profile" class="canva-button nav-btn w-full text-left" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Profile settings</button>
+     </div>
+    </div>
+   </div>
+   <nav id="mobile-nav" hidden="" aria-label="Mobile navigation" class="border-t border-slate-200 px-4 py-3 flex flex-wrap gap-1"><button type="button" data-view="overview" class="canva-button nav-btn active" style="color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">Overview</button> <button type="button" data-view="history" class="canva-button nav-btn" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Bookings</button> <button type="button" data-view="favorites" class="canva-button nav-btn" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Favorites</button> <button type="button" data-view="reviews" class="canva-button nav-btn" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Reviews</button> <button type="button" data-view="profile" class="canva-button nav-btn" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Profile</button>
+   </nav>
+  </header>
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-7 py-8 sm:py-10">
+   <div id="alert" role="alert" hidden="" class="mb-5 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800"></div>
+   <section class="mb-8 fade">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+     <div>
+      <p class="canva-text text-teal-700 font-bold mb-2" style="color: rgb(15, 118, 110); font-weight: 700; font-style: normal; font-size: 16px;">YOUR SERVICE SPACE</p>
+      <h1 class="canva-text font-extrabold tracking-tight mb-2" style="color: rgb(23, 37, 61); font-weight: 800; font-style: normal; font-size: 32px;">Welcome back, Alex</h1>
+      <p class="canva-text text-slate-600" style="color: rgb(71, 85, 105); font-weight: 400; font-style: normal; font-size: 16px;">A clear view of your local services, all in one place.</p>
+     </div><span class="canva-tag bg-amber-50 text-amber-900 border border-amber-200 rounded-xl px-4 py-2 font-bold" style="background: rgb(255, 251, 235); color: rgb(120, 53, 15); font-weight: 700; font-style: normal; font-size: 16px;">Demo data · Nothing here is real or saved</span>
+    </div>
+   </section>
+   <section aria-label="Dashboard overview statistics" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-8">
+    <article class="canva-card surface p-5" style="background: rgb(255, 255, 255);">
+     <span aria-hidden="true" class="text-blue-600">◷</span>
+     <p class="canva-text text-slate-500 mt-3" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Upcoming bookings</p><strong id="stat-upcoming" class="block text-3xl mt-1">2</strong>
+    </article>
+    <article class="canva-card surface p-5" style="background: rgb(255, 255, 255);">
+     <span aria-hidden="true" class="text-teal-600">✓</span>
+     <p class="canva-text text-slate-500 mt-3" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Completed services</p><strong id="stat-completed" class="block text-3xl mt-1">2</strong>
+    </article>
+    <article class="canva-card surface p-5" style="background: rgb(255, 255, 255);">
+     <span aria-hidden="true" class="text-blue-600">♡</span>
+     <p class="canva-text text-slate-500 mt-3" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Saved providers</p><strong id="stat-favorites" class="block text-3xl mt-1">2</strong>
+    </article>
+    <article class="canva-card surface p-5" style="background: rgb(255, 255, 255);">
+     <span aria-hidden="true" class="text-teal-600">☆</span>
+     <p class="canva-text text-slate-500 mt-3" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Pending reviews</p><strong id="stat-reviews" class="block text-3xl mt-1">2</strong>
+    </article>
+   </section>
+   <section id="view-overview" class="view fade" aria-labelledby="upcoming-heading">
+    <div class="flex items-center justify-between gap-3 mb-5">
+     <div>
+      <h2 id="upcoming-heading" class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Upcoming appointments</h2>
+      <p class="canva-text text-slate-500 mt-1" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Manage your appointments.</p>
+     </div><button type="button" data-view="history" class="canva-button secondary" style="background: rgb(255, 255, 255); color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">Booking history →</button>
+    </div>
+    <div id="upcoming-list" class="grid lg:grid-cols-2 gap-5"></div>
+    <div id="upcoming-empty" hidden="" class="surface p-8 text-center text-slate-500">
+     No upcoming demo appointments.
+    </div>
+   </section>
+   <section id="view-history" class="view fade" hidden="" aria-labelledby="history-heading">
+    <div class="mb-5">
+     <h2 id="history-heading" class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Booking history</h2>
+     <p class="canva-text text-slate-500 mt-1" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Explore fictional service records.</p>
+    </div>
+    <div class="surface p-4 mb-5 flex flex-wrap gap-4">
+     <div class="flex-1 min-w-40">
+      <label for="status-filter" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Status</label><select id="status-filter" class="field"><option value="all">All statuses</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+     </div>
+     <div class="flex-1 min-w-40">
+      <label for="service-filter" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Service</label><select id="service-filter" class="field"><option value="all">All services</option><option value="Electrical repair">Electrical repair</option><option value="Home cleaning">Home cleaning</option><option value="Plumbing">Plumbing</option><option value="Carpentry">Carpentry</option></select>
+     </div>
+    </div>
+    <div id="history-list" class="grid gap-4"></div>
+    <div id="history-empty" hidden="" class="surface p-10 text-center">
+     <p class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">No bookings match those filters</p>
+     <p class="canva-text text-slate-500 mt-2" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Try a different status or service.</p>
+    </div>
+   </section>
+   <section id="view-favorites" class="view fade" hidden="" aria-labelledby="favorites-heading">
+    <h2 id="favorites-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Favorite providers</h2>
+    <p class="canva-text text-slate-500 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Your saved sample professionals.</p>
+    <div id="favorite-list" class="grid md:grid-cols-2 gap-5">
+     <article class="favorite-card surface p-6" data-provider="maya" style="background: rgb(255, 255, 255);">
+      <div class="flex items-start gap-4">
+       <img loading="lazy" class="canva-image w-16 h-16 rounded-2xl object-cover flex-none" src="https://images.pexels.com/photos/9462192/pexels-photo-9462192.jpeg" alt="Female housekeeper smiling while holding cleaning tools indoors">
+       <div>
+        <h3 class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 19px;">Maya Rivera</h3>
+        <p class="canva-text text-slate-600" style="color: rgb(71, 85, 105); font-weight: 400; font-style: normal; font-size: 16px;">Home cleaning</p>
+        <p class="canva-text text-amber-700 font-bold mt-1" style="color: rgb(161, 98, 7); font-weight: 700; font-style: normal; font-size: 16px;">★ 4.9 · 82 reviews</p>
+       </div>
+      </div><span class="canva-tag pill bg-teal-50 text-teal-800 inline-block mt-5" style="background: rgb(240, 253, 250); color: rgb(17, 94, 89); font-weight: 400; font-style: normal; font-size: 16px;">✓ Verified demo profile</span>
+      <div class="flex flex-wrap gap-2 mt-5">
+       <button type="button" data-action="provider" class="canva-button secondary" style="background: rgb(255, 255, 255); color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">View profile</button><button type="button" data-action="unfavorite" class="canva-button danger" style="background: rgb(255, 255, 255); color: rgb(190, 18, 60); font-weight: 400; font-style: normal; font-size: 16px;">Remove favorite</button>
+      </div>
+     </article>
+     <article class="favorite-card surface p-6" data-provider="leo" style="background: rgb(255, 255, 255);">
+      <div class="flex items-start gap-4">
+       <img loading="lazy" class="canva-image w-16 h-16 rounded-2xl object-cover flex-none" src="https://images.pexels.com/photos/27928760/pexels-photo-27928760.jpeg" alt="Electrician adjusting a circuit breaker panel">
+       <div>
+        <h3 class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 19px;">Leo Bennett</h3>
+        <p class="canva-text text-slate-600" style="color: rgb(71, 85, 105); font-weight: 400; font-style: normal; font-size: 16px;">Electrical repair</p>
+        <p class="canva-text text-amber-700 font-bold mt-1" style="color: rgb(161, 98, 7); font-weight: 700; font-style: normal; font-size: 16px;">★ 4.8 · 64 reviews</p>
+       </div>
+      </div><span class="canva-tag pill bg-teal-50 text-teal-800 inline-block mt-5" style="background: rgb(240, 253, 250); color: rgb(17, 94, 89); font-weight: 400; font-style: normal; font-size: 16px;">✓ Verified demo profile</span>
+      <div class="flex flex-wrap gap-2 mt-5">
+       <button type="button" data-action="provider" class="canva-button secondary" style="background: rgb(255, 255, 255); color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">View profile</button><button type="button" data-action="unfavorite" class="canva-button danger" style="background: rgb(255, 255, 255); color: rgb(190, 18, 60); font-weight: 400; font-style: normal; font-size: 16px;">Remove favorite</button>
+      </div>
+     </article>
+    </div>
+    <div id="favorites-empty" hidden="" class="surface p-10 text-center">
+     <p class="canva-text text-slate-500" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">No favorite providers left in this demo.</p>
+    </div>
+   </section>
+   <section id="view-profile" class="view fade" hidden="" aria-labelledby="profile-heading">
+    <h2 id="profile-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Profile preferences</h2>
+    <p class="canva-text text-slate-500 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Try the form locally. Your details are not saved or sent.</p>
+    <form id="profile-form" novalidate="" class="surface p-5 sm:p-8 max-w-3xl">
+     <div class="grid sm:grid-cols-2 gap-5">
+      <div>
+       <label for="customer-name" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Full name *</label><input id="customer-name" class="field" autocomplete="off" value="Alex Morgan" aria-describedby="name-error">
+       <p id="name-error" class="text-rose-700 text-sm mt-1" role="alert"></p>
+      </div>
+      <div>
+       <label for="customer-email" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Email *</label><input id="customer-email" type="email" class="field" autocomplete="off" value="alex@example.test" aria-describedby="email-error">
+       <p id="email-error" class="text-rose-700 text-sm mt-1" role="alert"></p>
+      </div>
+      <div>
+       <label for="customer-phone" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Phone *</label><input id="customer-phone" type="tel" class="field" autocomplete="off" value="555 010 2456" aria-describedby="phone-error">
+       <p id="phone-error" class="text-rose-700 text-sm mt-1" role="alert"></p>
+      </div>
+      <div>
+       <label for="customer-location" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Preferred location *</label><input id="customer-location" class="field" autocomplete="off" value="North Harbor" aria-describedby="location-error">
+       <p id="location-error" class="text-rose-700 text-sm mt-1" role="alert"></p>
+      </div>
+     </div>
+     <fieldset class="border-t border-slate-200 mt-6 pt-5">
+      <legend class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Demo notification preferences</legend> <label class="flex gap-3 items-center mt-3"><input type="checkbox" class="accent-blue-600 w-5 h-5" checked=""><span class="canva-text" style="color: rgb(23, 37, 61); font-weight: 400; font-style: normal; font-size: 16px;">Email reminders (demo toggle)</span></label> <label class="flex gap-3 items-center mt-3"><input type="checkbox" class="accent-blue-600 w-5 h-5"><span class="canva-text" style="color: rgb(23, 37, 61); font-weight: 400; font-style: normal; font-size: 16px;">SMS reminders (demo toggle)</span></label>
+     </fieldset>
+     <div class="flex items-center flex-wrap gap-4 mt-7">
+      <button type="submit" class="canva-button primary" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Validate demo profile</button>
+      <p id="profile-result" role="status" class="text-teal-800 font-semibold"></p>
+     </div>
+    </form>
+   </section>
+   <section id="view-reviews" class="view fade" hidden="" aria-labelledby="reviews-heading">
+    <h2 id="reviews-heading" class="canva-text font-bold mb-2" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Reviews &amp; ratings</h2>
+    <p class="canva-text text-slate-500 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Practice leaving a review. Feedback stays on this page only.</p>
+    <form id="review-form" class="surface p-5 sm:p-8 max-w-2xl" novalidate=""><label for="review-booking" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Completed demo booking</label> <select id="review-booking" class="field mb-5"></select>
+     <fieldset>
+      <legend class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Your rating *</legend>
+      <div id="stars" class="flex gap-1" aria-label="Rating from one to five stars"><button type="button" data-rating="1" aria-label="1 star" aria-pressed="false" class="text-3xl text-slate-300">★</button> <button type="button" data-rating="2" aria-label="2 stars" aria-pressed="false" class="text-3xl text-slate-300">★</button> <button type="button" data-rating="3" aria-label="3 stars" aria-pressed="false" class="text-3xl text-slate-300">★</button> <button type="button" data-rating="4" aria-label="4 stars" aria-pressed="false" class="text-3xl text-slate-300">★</button> <button type="button" data-rating="5" aria-label="5 stars" aria-pressed="false" class="text-3xl text-slate-300">★</button>
+      </div>
+     </fieldset><label for="review-feedback" class="canva-text field-label mt-5" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">Feedback (optional)</label> <textarea id="review-feedback" rows="4" maxlength="500" class="field" placeholder="How did the sample service go?"></textarea>
+     <p id="review-error" role="alert" class="text-rose-700 mt-2"></p><button type="submit" class="canva-button primary mt-5" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Submit demo review</button>
+     <p id="review-result" role="status" class="text-teal-800 font-semibold mt-3"></p>
+    </form>
+   </section>
+  </main>
+  <footer class="canva-footer w-full border-t border-slate-200 mt-12 py-6 px-4 text-center" style="background: rgb(247, 249, 252);">
+   <p class="canva-text text-slate-500" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Phase 1 frontend demo • Mock data only</p>
+  </footer>
+  <template id="booking-template">
+   <article class="canva-card surface p-5 sm:p-6">
+    <div class="flex flex-wrap justify-between gap-3">
+     <div>
+      <h3 class="canva-text font-bold"></h3>
+      <p class="canva-text text-slate-600 mt-1"></p>
+     </div><span class="canva-tag pill h-fit"></span>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-2 mt-5 text-sm text-slate-600">
+     <p class="canva-text"></p>
+     <p class="canva-text"></p>
+     <p class="canva-text sm:col-span-2"></p>
+    </div>
+    <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-slate-100"><button type="button" data-action="details" class="canva-button secondary">View details</button> <button type="button" data-action="reschedule" class="canva-button secondary">Reschedule</button> <button type="button" data-action="cancel" class="canva-button danger">Cancel demo booking</button>
+    </div>
+   </article>
+  </template><dialog id="detail-dialog" aria-labelledby="detail-title">
+   <div class="p-6 sm:p-8">
+    <div class="flex justify-between gap-4">
+     <h2 id="detail-title" class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Demo appointment details</h2><button type="button" data-close="detail-dialog" aria-label="Close details" class="secondary">✕</button>
+    </div>
+    <div id="detail-body" class="mt-5 space-y-2 text-slate-700"></div>
+    <div id="reschedule-fields" hidden="" class="mt-5 border-t border-slate-200 pt-5 grid sm:grid-cols-2 gap-4">
+     <div>
+      <label for="new-date" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">New demo date</label><input id="new-date" type="date" class="field">
+     </div>
+     <div>
+      <label for="new-time" class="canva-text field-label" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 16px;">New demo time</label><input id="new-time" type="time" class="field">
+     </div><button type="button" id="confirm-reschedule" class="canva-button primary sm:col-span-2" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Save demo reschedule</button>
+    </div>
+    <p id="detail-error" role="alert" class="text-rose-700 mt-3"></p>
+    <p class="canva-text text-xs text-slate-500 mt-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 16px;">Illustrative details only. No provider is contacted.</p>
+   </div>
+  </dialog> <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+   <div class="p-6 sm:p-8">
+    <h2 id="confirm-title" class="canva-text font-bold" style="color: rgb(23, 37, 61); font-weight: 700; font-style: normal; font-size: 24px;">Cancel this demo booking?</h2>
+    <p class="canva-text text-slate-600 mt-3" style="color: rgb(71, 85, 105); font-weight: 400; font-style: normal; font-size: 16px;">This changes the sample dashboard only. No real appointment is affected.</p>
+    <div class="flex flex-wrap gap-3 mt-6">
+     <button type="button" id="confirm-cancel" class="canva-button danger" style="background: rgb(255, 255, 255); color: rgb(190, 18, 60); font-weight: 700; font-style: normal; font-size: 16px;">Yes, cancel demo booking</button><button type="button" data-close="confirm-dialog" class="canva-button secondary" style="background: rgb(255, 255, 255); color: rgb(37, 99, 235); font-weight: 400; font-style: normal; font-size: 16px;">Keep booking</button>
+    </div>
+   </div>
+  </dialog>
+  <script>
+    // Fictional application data stays separate from editable presentation.
+    const bookings=[];
+    const providers = {};
+    const reviewed = new Set();
+    let rating = 0, activeBooking = null, pendingCancel = null;
+    const $ = id => document.getElementById(id);
+    const readableDate = value => new Date(value+"T12:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+    function error(message) { $("alert").textContent=message; $("alert").hidden=false; $("alert").scrollIntoView({block:"nearest"}); }
+    function clearError() { $("alert").hidden=true; $("alert").textContent=""; }
+    function view(name) {
+      clearError();
+      document.querySelectorAll(".view").forEach(el=>el.hidden=el.id!=="view-"+name);
+      document.querySelectorAll("[data-view]").forEach(el=>el.classList.toggle("active",el.dataset.view===name));
+      $("mobile-nav").hidden=true; $("mobile-trigger").setAttribute("aria-expanded","false");
+      $("profile-popover").hidden=true; $("profile-trigger").setAttribute("aria-expanded","false");
+      document.querySelector("main").scrollIntoView({block:"start"});
+    }
+    function makeCard(booking) {
+      const node=$("booking-template").content.firstElementChild.cloneNode(true);
+      node.dataset.bookingId=booking.id;
+      node.querySelector('[data-template-id="booking-service"]').textContent=booking.service;
+      node.querySelector('[data-template-id="booking-provider"]').textContent="Provider · "+booking.provider;
+      const status=node.querySelector('[data-template-id="booking-status"]');
+      status.textContent=booking.status[0].toUpperCase()+booking.status.slice(1);
+      status.classList.add("pill-"+booking.status);
+      node.querySelector('[data-template-id="booking-date"]').textContent="📅 "+readableDate(booking.date);
+      node.querySelector('[data-template-id="booking-time"]').textContent="◷ "+booking.time;
+      node.querySelector('[data-template-id="booking-address"]').textContent="⌖ "+booking.address;
+      node.querySelectorAll('[data-action="reschedule"],[data-action="cancel"]').forEach(button=>button.hidden=booking.status!=="confirmed");
+      return node;
+    }
+    function syncList(container, items) {
+      const current=new Map([...container.children].map(node=>[node.dataset.bookingId,node]));
+      items.forEach((item,index)=>{
+        const existing=current.get(item.id);
+        const updated=makeCard(item);
+        if(existing) { existing.replaceWith(updated); current.delete(item.id); }
+        else container.appendChild(updated);
+        // Keep filtering and status changes aligned with their source order.
+        container.appendChild(updated);
+      });
+      current.forEach(node=>node.remove());
+    }
+    function render() {
+      const upcoming=bookings.filter(b=>b.status==="confirmed");
+      const history=bookings.filter(b=>($("status-filter").value==="all"||b.status===$("status-filter").value)&&($("service-filter").value==="all"||b.service===$("service-filter").value));
+      syncList($("upcoming-list"),upcoming); syncList($("history-list"),history);
+      $("upcoming-empty").hidden=upcoming.length!==0;
+      $("history-empty").hidden=history.length!==0;
+      $("stat-upcoming").textContent=upcoming.length;
+      $("stat-completed").textContent=bookings.filter(b=>b.status==="completed").length;
+      $("stat-favorites").textContent=document.querySelectorAll(".favorite-card:not([hidden])").length;
+      $("stat-reviews").textContent=bookings.filter(b=>b.status==="completed"&&!reviewed.has(b.id)).length;
+      $("favorites-empty").hidden=Number($("stat-favorites").textContent)!==0;
+      const select=$("review-booking"), previous=select.value;
+      select.replaceChildren();
+      const remaining=bookings.filter(b=>b.status==="completed"&&!reviewed.has(b.id));
+      if(!remaining.length) { const option=new Option("No completed bookings awaiting review",""); select.add(option); }
+      else remaining.forEach(b=>select.add(new Option(b.service+" · "+b.provider,b.id)));
+      if(remaining.some(b=>b.id===previous)) select.value=previous;
+      select.disabled=!remaining.length;
+      $("review-form").querySelector('[type="submit"]').disabled=!remaining.length;
+    }
+    function openDetails(b, reschedule=false) {
+      activeBooking=b;
+      $("detail-body").replaceChildren();
+      [b.service+" with "+b.provider,"Date: "+readableDate(b.date),"Time: "+b.time,"Address: "+b.address,"Status: "+b.status].forEach(line=>{const p=document.createElement("p");p.textContent=line;$("detail-body").appendChild(p)});
+      $("reschedule-fields").hidden=!reschedule;
+      $("detail-error").textContent="";
+      $("new-date").value=b.date; $("new-time").value=b.time;
+      $("detail-dialog").showModal();
+    }
+    document.querySelectorAll("[data-view]").forEach(el=>el.addEventListener("click",()=>view(el.dataset.view)));
+    $("mobile-trigger").addEventListener("click",()=>{const open=$("mobile-nav").hidden;$("mobile-nav").hidden=!open;$("mobile-trigger").setAttribute("aria-expanded",String(open))});
+    [["notifications-trigger","notifications-popover"],["profile-trigger","profile-popover"]].forEach(([trigger,popover])=>{
+      $(trigger).addEventListener("click",()=>{
+        const open=$(popover).hidden;
+        ["notifications-popover","profile-popover"].forEach(id=>$(id).hidden=true);
+        ["notifications-trigger","profile-trigger"].forEach(id=>$(id).setAttribute("aria-expanded","false"));
+        $(popover).hidden=!open;$(trigger).setAttribute("aria-expanded",String(open));
+      });
+    });
+    document.querySelectorAll("[data-close]").forEach(el=>el.addEventListener("click",()=>$(el.dataset.close).close()));
+    ["detail-dialog","confirm-dialog"].forEach(id=>$(id).addEventListener("click",event=>{if(event.target===$(id)) $(id).close()}));
+    document.addEventListener("click",event=>{
+      const button=event.target.closest("[data-action]");
+      if(!button) return;
+      const action=button.dataset.action;
+      if(action==="provider"||action==="unfavorite") {
+        const card=button.closest(".favorite-card");
+        if(action==="unfavorite"){card.hidden=true;render();return}
+        const p=providers[card.dataset.provider];
+        $("detail-body").replaceChildren();
+        [p.name,p.service,"Rating: ★ "+p.rating,"Verified demo profile · This is a fictional provider."].forEach(text=>{const line=document.createElement("p");line.textContent=text;$("detail-body").appendChild(line)});
+        $("reschedule-fields").hidden=true;$("detail-error").textContent="";$("detail-dialog").showModal();return;
+      }
+      const b=bookings.find(item=>item.id===button.closest("[data-booking-id]")?.dataset.bookingId);
+      if(!b){error("This demo booking could not be found.");return}
+      if(action==="details")openDetails(b);
+      if(action==="reschedule")openDetails(b,true);
+      if(action==="cancel"){pendingCancel=b;$("confirm-dialog").showModal()}
+    });
+    $("confirm-cancel").addEventListener("click",()=>{
+      if(!pendingCancel){$("confirm-dialog").close();error("This demo booking could not be found.");return}
+      const button=$("confirm-cancel");button.disabled=true;button.setAttribute("aria-busy","true");
+      setTimeout(()=>{pendingCancel.status="cancelled";pendingCancel=null;render();$("confirm-dialog").close();button.disabled=false;button.removeAttribute("aria-busy")},350);
+    });
+    $("confirm-reschedule").addEventListener("click",()=>{
+      if(!activeBooking||!$("new-date").value||!$("new-time").value){$("detail-error").textContent="Choose both a demo date and time.";return}
+      if($("new-date").value<new Date().toISOString().slice(0,10)){$("detail-error").textContent="Choose a date that is not in the past.";return}
+      const button=$("confirm-reschedule");button.disabled=true;button.setAttribute("aria-busy","true");
+      setTimeout(()=>{activeBooking.date=$("new-date").value;activeBooking.time=$("new-time").value;render();$("detail-dialog").close();button.disabled=false;button.removeAttribute("aria-busy")},350);
+    });
+    ["status-filter","service-filter"].forEach(id=>$(id).addEventListener("change",render));
+    $("profile-form").addEventListener("submit",event=>{
+      event.preventDefault();$("profile-result").textContent="";
+      const rules=[
+        ["customer-name","name-error",v=>v.trim().length>=2,"Enter a name with at least 2 characters."],
+        ["customer-email","email-error",v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),"Enter a valid email address."],
+        ["customer-phone","phone-error",v=>v.replace(/\D/g,"").length>=7,"Enter a phone number with at least 7 digits."],
+        ["customer-location","location-error",v=>v.trim().length>=2,"Enter your preferred location."]
+      ];
+      let first=null;
+      rules.forEach(([id,err,test,message])=>{const valid=test($(id).value);$(err).textContent=valid?"":message;$(id).setAttribute("aria-invalid",String(!valid));if(!valid&&!first)first=$(id)});
+      if(first){first.focus();return}
+      $("profile-result").textContent="Demo profile validated. Nothing was saved or sent.";
+    });
+    $("stars").addEventListener("click",event=>{
+      const button=event.target.closest("[data-rating]");if(!button)return;
+      rating=Number(button.dataset.rating);
+      $("stars").querySelectorAll("button").forEach(star=>{const selected=Number(star.dataset.rating)<=rating;star.classList.toggle("text-amber-500",selected);star.classList.toggle("text-slate-300",!selected);star.setAttribute("aria-pressed",String(Number(star.dataset.rating)===rating))});
+      $("review-error").textContent="";
+    });
+    $("review-form").addEventListener("submit",event=>{
+      event.preventDefault();$("review-result").textContent="";
+      const id=$("review-booking").value;
+      if(!id||reviewed.has(id)){$("review-error").textContent="Choose an unreviewed completed demo booking.";return}
+      if(!rating){$("review-error").textContent="Select a star rating first.";$("stars").querySelector("button").focus();return}
+      $("review-error").textContent="";
+      const button=$("review-form").querySelector('[type="submit"]');button.disabled=true;button.setAttribute("aria-busy","true");
+      setTimeout(()=>{
+        reviewed.add(id);$("review-result").textContent="Demo review submitted locally. It was not saved or shared.";
+        $("review-feedback").value="";rating=0;
+        $("stars").querySelectorAll("button").forEach(star=>{star.classList.remove("text-amber-500");star.classList.add("text-slate-300");star.setAttribute("aria-pressed","false")});
+        render();button.removeAttribute("aria-busy");
+      },350);
+    });
+    render();
+  </script>
+ 
+</body></html>

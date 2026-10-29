@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provider Dashboard | Local Service Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#2563eb;--teal:#14b8a6;--ink:#17243b;--muted:#64748b;--line:#e6ebf2;--surface:#fff}
+    *{box-sizing:border-box}body{font-family:"DM Sans",sans-serif;color:var(--ink);margin:0}
+    button,input,textarea,select{font:inherit}button{cursor:pointer}
+    :focus-visible{outline:3px solid #14b8a6!important;outline-offset:3px!important}
+    .shell{width:100%;min-height:100%;background:#f5f8fc}
+    .card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 28px rgba(28,55,95,.045)}
+    .navbtn{padding:10px 13px;border-radius:10px;color:#53647e;font-weight:700;white-space:nowrap}
+    .navbtn:hover,.navbtn.active{background:#eaf1ff;color:#2563eb}
+    .btn-primary{background:#2563eb;color:white;border-radius:11px;padding:10px 16px;font-weight:700}
+    .btn-primary:hover{background:#1d4ed8}
+    .btn-light{background:#eef4ff;color:#2563eb;border-radius:11px;padding:9px 14px;font-weight:700}
+    .btn-outline{border:1px solid #d9e3ef;border-radius:11px;padding:9px 14px;font-weight:700;background:white}
+    .btn-danger{color:#b42331;background:#fff1f2;border-radius:11px;padding:9px 14px;font-weight:700}
+    .field{width:100%;border:1px solid #d9e2ee;border-radius:11px;padding:11px 13px;background:white;color:#17243b}
+    .field:focus{border-color:#2563eb;outline:2px solid #bfdbfe}
+    .label{display:block;font-size:13px;font-weight:700;color:#394963;margin-bottom:7px}
+    .error{color:#b42331;font-size:12px;min-height:18px;margin-top:4px}
+    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700}
+    .pending{background:#fff4de;color:#946100}.accepted,.upcoming{background:#e6f8f4;color:#087968}.rejected,.cancelled{background:#fff0f1;color:#b42331}.completed{background:#eaf1ff;color:#2057bc}
+    .tab{border-bottom:3px solid transparent;padding:12px 14px;font-weight:700;color:#64748b}
+    .tab[aria-selected=true]{border-color:#2563eb;color:#2563eb}
+    .view[hidden],.dialog-backdrop[hidden],[hidden]{display:none!important}
+    .dialog-backdrop{position:fixed;inset:0;background:rgba(17,32,56,.6);z-index:50;display:grid;place-items:center;padding:16px}
+    .dialog-box{width:min(100%,520px);max-height:90%;overflow:auto}
+    .day.active{background:#dff8f3;border-color:#14b8a6;color:#087968}
+    .bar{height:9px;border-radius:99px;background:#e8eef6;overflow:hidden}.bar>span{display:block;height:100%;border-radius:99px;background:#14b8a6}
+    .reveal{animation:rise .35s ease both}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:800px){.desktop-nav{display:none!important}.mobile-toggle{display:flex!important}}
+    @media(min-width:801px){.mobile-panel{display:none!important}}
+    @media(prefers-reduced-motion:reduce){.reveal{animation:none}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  </head>
+ <body class="w-full" style="background: rgb(245, 248, 252);">
+  <div class="shell w-full">
+   <header class="canva-header bg-white border-b border-slate-200 sticky top-0 z-30" style="background: rgb(255, 255, 255);">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+     <div class="flex items-center gap-3 shrink-0"><span class="w-10 h-10 rounded-xl bg-blue-600 text-white grid place-items" aria-hidden="true"><i data-lucide="house-plus" class="w-5 h-5"></i></span>
+      <div>
+       <div class="canva-text font-extrabold leading-tight" style="color: rgb(23, 36, 59); font-weight: 800; font-style: normal; font-size: 16px;">Local Service Finder</div>
+       <div class="canva-text leading-tight" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 11px;">Provider workspace</div>
+      </div>
+     </div>
+     <nav class="desktop-nav flex items-center gap-1" aria-label="Main navigation" id="desktop-nav"></nav>
+     <div class="flex items-center gap-2"><button id="notifications" type="button" class="btn-outline !p-2.5" aria-label="Show notifications"><i data-lucide="bell" class="w-5 h-5"></i></button>
+      <div class="relative"><button id="profile-menu-button" type="button" class="flex items-center gap-2 rounded-xl border border-slate-200 p-1.5 pr-3" aria-expanded="false" aria-controls="profile-menu" aria-label="Open provider menu"> <img class="canva-image w-8 h-8 rounded-full object-cover" loading="lazy" src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400" alt="Portrait of a happy man with arms crossed, exuding confidence and friendliness."> <span class="hidden sm:block text-sm font-bold"></span><i data-lucide="chevron-down" class="w-4 h-4"></i> </button>
+       <div id="profile-menu" hidden="" class="absolute right-0 top-full mt-2 w-48 card p-2 shadow-xl"><button type="button" data-menu-view="profile" class="w-full text-left rounded-lg px-3 py-2 hover:bg-slate-50">Manage profile</button> <button type="button" data-menu-view="availability" class="w-full text-left rounded-lg px-3 py-2 hover:bg-slate-50">Availability</button>
+       </div>
+      </div><button id="mobile-toggle" type="button" class="mobile-toggle btn-outline !p-2.5 hidden items-center" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-panel"><i data-lucide="menu" class="w-5 h-5"></i></button>
+     </div>
+    </div>
+    <nav id="mobile-panel" class="mobile-panel px-4 pb-4 border-t border-slate-100 grid grid-cols-2 gap-1" aria-label="Mobile navigation" hidden=""></nav>
+   </header>
+   <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-9">
+    <div id="feedback" role="status" aria-live="polite" hidden="" class="mb-5 card px-4 py-3 flex items-start justify-between gap-3 border-l-4 border-l-teal-500"><span id="feedback-text"></span><button id="dismiss-feedback" type="button" class="font-bold text-slate-500 px-2" aria-label="Dismiss message">×</button>
+    </div>
+    <section class="mb-7">
+     <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+       <p class="canva-text font-bold uppercase tracking-widest mb-2" style="color: rgb(37, 99, 235); font-weight: 700; font-style: normal; font-size: 11px;">PROVIDER DASHBOARD</p>
+       <h1 class="canva-text font-extrabold tracking-tight leading-tight" style="color: rgb(23, 36, 59); font-weight: 800; font-style: normal; font-size: 32px;">Good morning, </h1>
+       <p class="canva-text mt-2" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Manage your day, your services, and your customer requests in one place.</p>
+      </div><span class="canva-tag inline-flex items-center gap-2 rounded-full px-4 py-2 font-bold border border-teal-200" style="background: rgb(230, 248, 244); color: rgb(8, 121, 104);"><i data-lucide="info" class="w-4 h-4"></i><span>Demo data · No live bookings</span></span>
+     </div>
+    </section>
+    <section id="overview" class="view reveal" aria-labelledby="overview-title">
+     <h2 id="overview-title" class="canva-text font-bold mb-4" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">At a glance</h2>
+     <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-7" id="stat-grid"></div>
+     <div class="grid lg:grid-cols-[1.45fr_1fr] gap-5">
+      <div class="card p-5 sm:p-6">
+       <div class="flex items-center justify-between gap-3 mb-4">
+        <h3 class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 18px;">Recent booking requests</h3><button type="button" data-go="requests" class="text-blue-600 font-bold text-sm">View all →</button>
+       </div>
+       <div id="overview-request-list" class="space-y-3"></div>
+      </div>
+      <div class="card p-5 sm:p-6">
+       <h3 class="canva-text font-bold mb-4" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 18px;">Next up</h3>
+       <div id="next-appointment"></div>
+      </div>
+     </div>
+    </section>
+    <section id="requests" class="view reveal" hidden="" aria-labelledby="requests-heading">
+     <div class="mb-5">
+      <h2 id="requests-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Booking requests</h2>
+      <p class="canva-text mt-1" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Try Accept or Reject to see how a request changes in this demo.</p>
+     </div>
+     <div id="request-list" class="grid gap-4"></div>
+     <p id="requests-empty" hidden="" class="card p-8 text-center text-slate-500">No requests yet.</p>
+    </section>
+    <section id="appointments" class="view reveal" hidden="" aria-labelledby="appointments-heading">
+     <h2 id="appointments-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Appointments</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Browse fictional jobs and inspect their details.</p>
+     <div class="card p-4 sm:p-5">
+      <div class="flex flex-wrap border-b border-slate-200 mb-5" role="tablist" aria-label="Appointment status"><button type="button" class="tab" data-appointment-tab="upcoming" role="tab" aria-selected="true">Upcoming</button> <button type="button" class="tab" data-appointment-tab="completed" role="tab" aria-selected="false">Completed</button> <button type="button" class="tab" data-appointment-tab="cancelled" role="tab" aria-selected="false">Cancelled</button>
+      </div>
+      <div class="grid sm:grid-cols-[1fr_200px] gap-3 mb-5">
+       <div>
+        <label for="appointment-search" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Search customer, service, or area</label><input id="appointment-search" class="field" type="search" placeholder="Search demo appointments">
+       </div>
+       <div>
+        <label for="appointment-filter" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Service</label><select id="appointment-filter" class="field"><option value="">All services</option></select>
+       </div>
+      </div>
+      <div id="appointment-list" class="grid gap-3"></div>
+      <p id="appointments-empty" hidden="" class="py-10 text-center text-slate-500">No appointments match these filters. Try another search or tab.</p>
+     </div>
+    </section>
+    <section id="profile" class="view reveal" hidden="" aria-labelledby="profile-heading">
+     <h2 id="profile-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Manage profile</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Changes are local to this demo and reset when the page reloads.</p>
+     <form id="profile-form" novalidate="" class="card p-5 sm:p-7 max-w-4xl">
+      <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl mb-6">
+       <i data-lucide="shield-check" class="w-5 h-5 text-blue-600"></i>
+       <div>
+        <strong class="canva-text block" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 15px;">Verification status: Demo only</strong><span class="canva-text text-sm" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">No identity checks or verification are performed.</span>
+       </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-x-5">
+       <div>
+        <label for="business-name" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Business name *</label><input id="business-name" name="business_name" class="field" required="" maxlength="70">
+        <p class="error" id="business-name-error"></p>
+       </div>
+       <div>
+        <label for="profession" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Profession *</label><input id="profession" name="profession" class="field" required="" maxlength="70">
+        <p class="error" id="profession-error"></p>
+       </div>
+       <div class="sm:col-span-2">
+        <label for="description" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Business description *</label><textarea id="description" name="description" class="field" required="" maxlength="400" rows="3"></textarea>
+        <p class="error" id="description-error"></p>
+       </div>
+       <div>
+        <label for="experience" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Years of experience *</label><input id="experience" name="experience" class="field" type="number" min="0" max="60" required="">
+        <p class="error" id="experience-error"></p>
+       </div>
+       <div>
+        <label for="areas" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Service areas *</label><input id="areas" name="areas" class="field" required="" maxlength="150">
+        <p class="error" id="areas-error"></p>
+       </div>
+      </div>
+      <fieldset class="mt-2">
+       <legend class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Contact preferences</legend>
+       <div class="flex flex-wrap gap-5">
+        <label class="flex gap-2 items-center"><input name="contact" type="checkbox" value="In-app messages"> In-app messages (demo)</label><label class="flex gap-2 items-center"><input name="contact" type="checkbox" value="Email"> Email preference (demo)</label><label class="flex gap-2 items-center"><input name="contact" type="checkbox" value="Phone"> Phone preference (demo)</label>
+       </div>
+      </fieldset><button id="save-profile" type="submit" class="canva-button btn-primary mt-6" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 15px;">Save demo profile</button>
+     </form>
+    </section>
+    <section id="services" class="view reveal" hidden="" aria-labelledby="services-heading">
+     <h2 id="services-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Services &amp; pricing</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Edit mock offerings and starting prices. Nothing is published.</p>
+     <div class="card p-5 sm:p-6">
+      <div id="service-list" class="grid gap-3 mb-6"></div>
+      <h3 class="canva-text font-bold mb-3" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 18px;">Add a service</h3>
+      <form id="service-form" novalidate="" class="grid sm:grid-cols-[1.4fr_1fr_1fr_auto] gap-3 items-start">
+       <div>
+        <label for="service-name" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Service name *</label><input id="service-name" class="field" maxlength="60" required="">
+       </div>
+       <div>
+        <label for="service-price" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Starting price (₹) *</label><input id="service-price" class="field" type="number" min="1" max="1000000" required="">
+       </div>
+       <div>
+        <label for="service-duration" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Duration label *</label><input id="service-duration" class="field" placeholder="e.g. 2 hours" maxlength="30" required="">
+       </div><button type="submit" class="canva-button btn-primary sm:mt-[27px]" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 15px;">Add service</button>
+      </form>
+      <p id="service-form-error" class="error" role="alert"></p>
+     </div>
+    </section>
+    <section id="availability" class="view reveal" hidden="" aria-labelledby="availability-heading">
+     <h2 id="availability-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Availability</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Plan a sample working week. Your selections stay on this page only.</p>
+     <div class="card p-5 sm:p-7 max-w-3xl">
+      <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+       <div>
+        <h3 class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 18px;">Accepting requests</h3>
+        <p class="canva-text text-sm" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Switch off to preview an unavailable state.</p>
+       </div><label class="flex items-center gap-3 font-bold"><input id="unavailable" type="checkbox" class="w-5 h-5 accent-blue-600"> Unavailable</label>
+      </div>
+      <fieldset id="schedule-fields">
+       <legend class="canva-text label mb-3" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Working days</legend>
+       <div id="working-days" class="flex flex-wrap gap-2 mb-6"></div>
+       <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+         <label for="start-time" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">Start time</label><input id="start-time" class="field" type="time" value="09:00">
+        </div>
+        <div>
+         <label for="end-time" class="canva-text label" style="color: rgb(57, 73, 99); font-weight: 700; font-style: normal; font-size: 13px;">End time</label><input id="end-time" class="field" type="time" value="18:00">
+        </div>
+       </div>
+      </fieldset>
+      <p id="availability-error" class="error mt-3" role="alert"></p><button id="save-availability" type="button" class="canva-button btn-primary mt-4" style="background: rgb(37, 99, 235); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 15px;">Save demo availability</button>
+     </div>
+    </section>
+    <section id="reviews" class="view reveal" hidden="" aria-labelledby="reviews-heading">
+     <h2 id="reviews-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Customer reviews</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Fictional reviews and replies for this frontend demo.</p>
+     <div class="grid lg:grid-cols-[300px_1fr] gap-5">
+      <div class="card p-6 self-start">
+       <div class="text-4xl font-extrabold text-slate-900">
+        4.8 <span class="text-amber-500 text-2xl" aria-hidden="true">★</span>
+       </div>
+       <p class="text-slate-500 mb-5">Demo average · 24 sample reviews</p>
+       <div id="rating-distribution"></div>
+      </div>
+      <div id="review-list" class="grid gap-4"></div>
+     </div>
+    </section>
+    <section id="analytics" class="view reveal" hidden="" aria-labelledby="analytics-heading">
+     <h2 id="analytics-heading" class="canva-text font-bold" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 23px;">Performance snapshot</h2>
+     <p class="canva-text mt-1 mb-5" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 15px;">Illustrative demo statistics, not live business performance.</p>
+     <div class="grid sm:grid-cols-3 gap-4 mb-5">
+      <div class="card p-5">
+       <p class="text-slate-500">Demo profile views</p><strong class="text-3xl">248</strong>
+       <p class="text-sm text-teal-700 mt-2">Illustrative this month</p>
+      </div>
+      <div class="card p-5">
+       <p class="text-slate-500">Demo response rate</p><strong class="text-3xl">92%</strong>
+       <p class="text-sm text-teal-700 mt-2">Illustrative this month</p>
+      </div>
+      <div class="card p-5">
+       <p class="text-slate-500">Demo repeat customers</p><strong class="text-3xl">6</strong>
+       <p class="text-sm text-teal-700 mt-2">Illustrative this month</p>
+      </div>
+     </div>
+     <div class="card p-6">
+      <h3 class="canva-text font-bold mb-1" style="color: rgb(23, 36, 59); font-weight: 700; font-style: normal; font-size: 18px;">Sample weekly requests</h3>
+      <p class="text-slate-500 text-sm mb-5">Example counts for visual comparison; not actual requests.</p>
+      <div id="weekly-bars" class="space-y-4"></div>
+     </div>
+    </section>
+   </main>
+   <footer class="canva-footer w-full border-t border-slate-200 mt-8" style="background: rgb(245, 248, 252);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+     <p class="canva-text" style="color: rgb(100, 116, 139); font-weight: 400; font-style: normal; font-size: 13px;">Phase 1 frontend demo • Mock data only</p>
+    </div>
+   </footer>
+  </div>
+  <div id="modal" class="dialog-backdrop" hidden="">
+   <div class="dialog-box card p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+    <div class="flex justify-between items-start gap-4 mb-4">
+     <h2 id="modal-title" class="font-bold text-xl"></h2><button id="close-modal" type="button" class="btn-outline !p-2" aria-label="Close dialog">×</button>
+    </div>
+    <div id="modal-body"></div>
+   </div>
+  </div>
+  <script>
+(() => {
+  // Fictional records are isolated from rendering so an API adapter can replace them later.
+  const mockData = {
+    provider:{business_name:"",profession:"",description:"",experience:"0",areas:"",contact:["In-app messages","Email"]},
+    requests:[],
+    appointments:[],
+    services:[],
+    reviews:[],
+    weekly:[["Mon",3],["Tue",5],["Wed",4],["Thu",7],["Fri",6],["Sat",8],["Sun",2]],
+    distribution:[[5,19],[4,4],[3,1],[2,0],[1,0]]
+  };
+  const nav=[["overview","Overview"],["requests","Requests"],["appointments","Appointments"],["profile","Profile"],["services","Services"],["availability","Availability"],["reviews","Reviews"],["analytics","Analytics"]];
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);
+  const date=s=>new Intl.DateTimeFormat("en-IN",{day:"numeric",month:"short",year:"numeric"}).format(new Date(s+"T12:00:00"));
+  const time=s=>new Intl.DateTimeFormat("en-IN",{hour:"numeric",minute:"2-digit",hour12:true}).format(new Date("2026-01-01T"+s+":00"));
+  let currentView="overview",appointmentTab="upcoming",lastFocus=null,modalCleanup=null;
+  function notice(message,error=false){$("feedback-text").textContent=message;$("feedback").hidden=false;$("feedback").style.borderLeftColor=error?"#dc2626":"#14b8a6"}
+  $("dismiss-feedback").onclick=()=>{$("feedback").hidden=true};
+  function busy(button,fn){button.disabled=true;button.setAttribute("aria-busy","true");const old=button.textContent;button.textContent="Saving demo…";setTimeout(()=>{fn();button.textContent=old;button.disabled=false;button.removeAttribute("aria-busy")},320)}
+  function openModal(title,build){lastFocus=document.activeElement;$("modal-title").textContent=title;$("modal-body").replaceChildren();if(modalCleanup)modalCleanup();modalCleanup=null;build($("modal-body"));$("modal").hidden=false;document.body.style.overflow="hidden";$("close-modal").focus()}
+  function closeModal(){$("modal").hidden=true;document.body.style.overflow="";$("modal-body").replaceChildren();if(modalCleanup)modalCleanup();modalCleanup=null;lastFocus?.focus()}
+  $("close-modal").onclick=closeModal;
+  $("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("modal").hidden)closeModal();if(e.key==="Tab"&&!$("modal").hidden){const focusable=[...$("modal").querySelectorAll("button:not([disabled]),input:not([disabled]),textarea:not([disabled])")].filter(el=>el.offsetParent!==null);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
+  function show(view){currentView=view;document.querySelectorAll(".view").forEach(el=>el.hidden=el.id!==view);document.querySelectorAll("[data-nav]").forEach(el=>{const active=el.dataset.nav===view;el.classList.toggle("active",active);if(active)el.setAttribute("aria-current","page");else el.removeAttribute("aria-current")});$("mobile-panel").hidden=true;$("mobile-toggle").setAttribute("aria-expanded","false");$("profile-menu").hidden=true;$("profile-menu-button").setAttribute("aria-expanded","false");if(view==="requests")renderRequests();if(view==="appointments")renderAppointments();if(view==="services")renderServices();if(view==="reviews")renderReviews()}
+  function initNav(){for(const [id,label] of nav){for(const target of [$("desktop-nav"),$("mobile-panel")]){const b=document.createElement("button");b.type="button";b.className="navbtn text-left";b.dataset.nav=id;b.textContent=label;b.onclick=()=>show(id);target.appendChild(b)}}show("overview")}
+  $("mobile-toggle").onclick=()=>{const open=$("mobile-panel").hidden;$("mobile-panel").hidden=!open;$("mobile-toggle").setAttribute("aria-expanded",String(open))};
+  $("profile-menu-button").onclick=()=>{const open=$("profile-menu").hidden;$("profile-menu").hidden=!open;$("profile-menu-button").setAttribute("aria-expanded",String(open))};
+  document.querySelectorAll("[data-menu-view]").forEach(b=>b.onclick=()=>show(b.dataset.menuView));
+  document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+  $("notifications").onclick=()=>notice("Demo notifications: You have "+mockData.requests.filter(r=>r.status==="pending").length+" pending sample requests. No real notifications are sent.");
+  function renderOverview(){
+    const stats=[["Pending requests",mockData.requests.filter(r=>r.status==="pending").length,"inbox"],["Upcoming appointments",mockData.appointments.filter(a=>a.status==="upcoming").length+mockData.requests.filter(r=>r.status==="accepted").length,"calendar-days"],["Completed jobs",18,"circle-check"],["Average rating","4.8 / 5","star"],["Estimated demo earnings",money(38400),"indian-rupee"]];
+    $("stat-grid").innerHTML=stats.map(([label,value,icon])=>`<article class="card p-4 sm:p-5 min-w-0"><span class="inline-grid place-items-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600 mb-3"><i data-lucide="${icon}" class="w-5 h-5"></i></span><p class="text-xs sm:text-sm text-slate-500 font-semibold">${label}</p><strong class="block text-xl sm:text-2xl mt-1 break-words">${esc(value)}</strong></article>`).join("");
+    const pending=mockData.requests.filter(r=>r.status==="pending").slice(0,2);
+    $("overview-request-list").innerHTML=pending.length?pending.map(r=>`<div class="rounded-xl border border-slate-200 p-4 flex flex-wrap justify-between gap-2"><div><strong>${esc(r.customer)}</strong><p class="text-sm text-slate-500">${esc(r.service)} · ${date(r.date)}</p></div><span class="badge pending self-start">Pending</span></div>`).join(""):'<p class="text-slate-500">No pending demo requests.</p>';
+    const a=mockData.appointments.find(x=>x.status==="upcoming");
+    $("next-appointment").innerHTML=a?`<div class="rounded-xl bg-blue-50 p-5"><span class="badge upcoming mb-3">Upcoming · demo</span><p class="font-bold text-lg">${esc(a.service)}</p><p class="mt-2 text-slate-600">${esc(a.customer)} · ${esc(a.area)}</p><p class="text-slate-600">${date(a.date)} at ${time(a.time)}</p><button type="button" id="view-next" class="btn-primary mt-5">View appointment</button></div>`:'<p class="text-slate-500">No upcoming demo appointments.</p>';
+    $("view-next")?.addEventListener("click",()=>appointmentDetail(a));lucide.createIcons()
+  }
+  function renderRequests(){
+    $("request-list").innerHTML=mockData.requests.map(r=>`<article class="card p-5 sm:p-6" data-request="${r.id}"><div class="flex flex-wrap justify-between gap-3"><div><h3 class="font-bold text-lg">${esc(r.customer)}</h3><p class="text-blue-700 font-semibold">${esc(r.service)}</p></div><span class="badge ${r.status} self-start">${r.status[0].toUpperCase()+r.status.slice(1)} · demo</span></div><div class="grid sm:grid-cols-3 gap-3 text-sm text-slate-600 mt-5"><p><strong class="text-slate-800">When</strong><br>${date(r.date)} · ${time(r.time)}</p><p><strong class="text-slate-800">Area</strong><br>${esc(r.area)}</p><p><strong class="text-slate-800">Price estimate</strong><br>${money(r.price)} · demo</p></div>${r.status==="pending"?`<div class="flex gap-2 mt-5"><button type="button" class="btn-primary" data-request-action="accepted" data-id="${r.id}">Accept demo</button><button type="button" class="btn-danger" data-request-action="rejected" data-id="${r.id}">Reject demo</button></div>`:""}</article>`).join("");
+    $("requests-empty").hidden=mockData.requests.length>0;
+    $("request-list").querySelectorAll("[data-request-action]").forEach(b=>b.onclick=()=>{const r=mockData.requests.find(x=>x.id===b.dataset.id);if(!r||r.status!=="pending")return;b.disabled=true;b.textContent="Updating…";setTimeout(()=>{r.status=b.dataset.requestAction;notice(`${r.customer}'s sample request marked ${r.status}. This is a local demo change; no customer was contacted.`);renderRequests();renderOverview();renderAppointments()},280)})
+  }
+  function appointmentItems(){return [...mockData.appointments,...mockData.requests.filter(r=>r.status==="accepted").map(r=>({...r,id:"booking-"+r.id,status:"upcoming",note:"Accepted in this demo; no real booking was made."}))]}
+  function renderAppointments(){
+    document.querySelectorAll("[data-appointment-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.appointmentTab===appointmentTab)));
+    const q=$("appointment-search").value.trim().toLowerCase(),filter=$("appointment-filter").value;
+    const items=appointmentItems().filter(a=>a.status===appointmentTab&&(!filter||a.service===filter)&&(!q||[a.customer,a.service,a.area].some(v=>v.toLowerCase().includes(q))));
+    $("appointment-list").innerHTML=items.map(a=>`<article class="rounded-xl border border-slate-200 p-4 flex flex-wrap justify-between items-center gap-3"><div><h3 class="font-bold">${esc(a.service)}</h3><p class="text-sm text-slate-600">${esc(a.customer)} · ${esc(a.area)}</p><p class="text-sm text-slate-500">${date(a.date)} · ${time(a.time)}</p></div><button type="button" class="btn-light" data-detail="${a.id}">View details</button></article>`).join("");
+    $("appointments-empty").hidden=items.length>0;
+    $("appointment-list").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>appointmentDetail(appointmentItems().find(a=>a.id===b.dataset.detail)))
+  }
+  function appointmentDetail(a){if(!a)return;openModal("Demo appointment details",body=>{body.innerHTML=`<dl class="grid grid-cols-[120px_1fr] gap-3 text-sm"><dt class="text-slate-500">Customer</dt><dd class="font-semibold">${esc(a.customer)}</dd><dt class="text-slate-500">Service</dt><dd>${esc(a.service)}</dd><dt class="text-slate-500">Schedule</dt><dd>${date(a.date)} at ${time(a.time)}</dd><dt class="text-slate-500">Area</dt><dd>${esc(a.area)}</dd><dt class="text-slate-500">Estimate</dt><dd>${money(a.price)} (demo)</dd><dt class="text-slate-500">Status</dt><dd>${esc(a.status)} (demo)</dd><dt class="text-slate-500">Notes</dt><dd>${esc(a.note)}</dd></dl><p class="text-xs text-slate-500 mt-5">Fictional appointment. No booking has been made.</p>`})}
+  document.querySelectorAll("[data-appointment-tab]").forEach(b=>b.onclick=()=>{appointmentTab=b.dataset.appointmentTab;renderAppointments()});
+  $("appointment-search").oninput=renderAppointments;$("appointment-filter").onchange=renderAppointments;
+  function updateFilter(){const select=$("appointment-filter"),old=select.value;select.innerHTML='<option value="">All services</option>';[...new Set(appointmentItems().map(a=>a.service))].forEach(name=>{const o=document.createElement("option");o.value=name;o.textContent=name;select.appendChild(o)});select.value=old}
+  function initProfile(){const p=mockData.provider;for(const [key,id] of [["business_name","business-name"],["profession","profession"],["description","description"],["experience","experience"],["areas","areas"]])$(id).value=p[key];document.querySelectorAll('input[name="contact"]').forEach(c=>c.checked=p.contact.includes(c.value))}
+  $("profile-form").addEventListener("submit",e=>{e.preventDefault();let good=true,first;const fields=[["business-name","Enter a business name."],["profession","Enter a profession."],["description","Enter a business description."],["experience","Enter 0 to 60 years of experience."],["areas","Enter at least one service area."]];fields.forEach(([id,msg])=>{const input=$(id),invalid=!input.value.trim()||(id==="experience"&&(!Number.isInteger(Number(input.value))||Number(input.value)<0||Number(input.value)>60));$(id+"-error").textContent=invalid?msg:"";input.setAttribute("aria-invalid",String(invalid));if(invalid){good=false;first??=input}});if(!good){first.focus();notice("Please correct the highlighted profile fields.",true);return}busy($("save-profile"),()=>{const p=mockData.provider;p.business_name=$("business-name").value.trim();p.profession=$("profession").value.trim();p.description=$("description").value.trim();p.experience=$("experience").value;p.areas=$("areas").value.trim();p.contact=[...document.querySelectorAll('input[name="contact"]:checked')].map(c=>c.value);notice("Demo profile updated on this page only. No information was sent or saved.")})});
+  function renderServices(){
+    $("service-list").innerHTML=mockData.services.map(s=>`<article class="rounded-xl border border-slate-200 p-4 flex flex-wrap justify-between items-center gap-3"><div><h3 class="font-bold">${esc(s.name)}</h3><p class="text-sm text-slate-500">From ${money(s.price)} · ${esc(s.duration)} · demo</p></div><div class="flex gap-2"><button type="button" class="btn-light" data-edit-service="${s.id}">Edit</button><button type="button" class="btn-danger" data-remove-service="${s.id}">Remove</button></div></article>`).join("")||'<p class="text-slate-500 py-6">No demo services yet. Add one below.</p>';
+    $("service-list").querySelectorAll("[data-edit-service]").forEach(b=>b.onclick=()=>editService(b.dataset.editService));
+    $("service-list").querySelectorAll("[data-remove-service]").forEach(b=>b.onclick=()=>{mockData.services=mockData.services.filter(s=>s.id!==b.dataset.removeService);renderServices();notice("Demo service removed from this page only.")})
+  }
+  function validService(name,price,duration){if(!name.trim()||!duration.trim())return "Enter a service name and duration.";if(!Number.isFinite(Number(price))||Number(price)<1||Number(price)>1000000)return "Enter a starting price between ₹1 and ₹10,00,000.";return ""}
+  $("service-form").addEventListener("submit",e=>{e.preventDefault();const name=$("service-name").value,price=$("service-price").value,duration=$("service-duration").value;const error=validService(name,price,duration);$("service-form-error").textContent=error;if(error){notice(error,true);return}mockData.services.push({id:"s"+Date.now(),name:name.trim(),price:Number(price),duration:duration.trim()});$("service-form").reset();renderServices();notice("Demo service added locally. It has not been published.")});
+  function editService(id){const s=mockData.services.find(x=>x.id===id);if(!s)return;openModal("Edit demo service",body=>{const form=document.createElement("form");form.noValidate=true;form.innerHTML=`<label class="label" for="edit-name">Service name *</label><input id="edit-name" class="field mb-3" maxlength="60" required value="${esc(s.name)}"><label class="label" for="edit-price">Starting price (₹) *</label><input id="edit-price" class="field mb-3" type="number" min="1" max="1000000" required value="${s.price}"><label class="label" for="edit-duration">Duration label *</label><input id="edit-duration" class="field" maxlength="30" required value="${esc(s.duration)}"><p id="edit-error" class="error" role="alert"></p><button type="submit" class="btn-primary mt-3">Save demo service</button>`;body.appendChild(form);form.onsubmit=e=>{e.preventDefault();const name=$("edit-name").value,price=$("edit-price").value,duration=$("edit-duration").value,error=validService(name,price,duration);$("edit-error").textContent=error;if(error)return;s.name=name.trim();s.price=Number(price);s.duration=duration.trim();closeModal();renderServices();notice("Demo service edited locally. It has not been published.")};$("edit-name").focus()})}
+  const days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];let selectedDays=new Set(["Mon","Tue","Wed","Thu","Fri","Sat"]);
+  function renderDays(){$("working-days").innerHTML=days.map(d=>`<button type="button" data-day="${d}" aria-pressed="${selectedDays.has(d)}" class="day border border-slate-200 px-4 py-2 rounded-xl font-bold ${selectedDays.has(d)?"active":""}">${d}</button>`).join("");$("working-days").querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{selectedDays.has(b.dataset.day)?selectedDays.delete(b.dataset.day):selectedDays.add(b.dataset.day);renderDays()})}
+  $("unavailable").onchange=()=>{$("schedule-fields").disabled=$("unavailable").checked;$("availability-error").textContent=""};
+  $("save-availability").onclick=()=>{const off=$("unavailable").checked,start=$("start-time").value,end=$("end-time").value;let error="";if(!off&&!selectedDays.size)error="Choose at least one working day or mark yourself unavailable.";else if(!off&&(!start||!end||start>=end))error="Choose a start time earlier than the end time.";$("availability-error").textContent=error;if(error){notice(error,true);return}busy($("save-availability"),()=>notice(off?"Demo availability set to unavailable on this page only.":`Demo availability set for ${[...selectedDays].join(", ")} from ${time(start)} to ${time(end)}. Nothing was published.`))};
+  function renderReviews(){$("review-list").innerHTML=mockData.reviews.map(r=>`<article class="card p-5"><div class="flex flex-wrap justify-between gap-2"><div><h3 class="font-bold">${esc(r.customer)}</h3><p class="text-amber-600" aria-label="${r.rating} out of 5 stars">${"★".repeat(r.rating)}<span class="text-slate-300">${"★".repeat(5-r.rating)}</span></p></div><span class="text-sm text-slate-500">${esc(r.date)}</span></div><p class="my-3 text-slate-700">${esc(r.body)}</p>${r.reply?`<div class="rounded-xl bg-blue-50 p-3 text-sm"><strong>Demo provider reply</strong><p>${esc(r.reply)}</p></div>`:`<button type="button" class="btn-light" data-reply="${r.id}">Reply in demo</button>`}</article>`).join("");$("review-list").querySelectorAll("[data-reply]").forEach(b=>b.onclick=()=>replyReview(b.dataset.reply))}
+  function replyReview(id){const r=mockData.reviews.find(x=>x.id===id);openModal("Reply to demo review",body=>{const form=document.createElement("form");form.noValidate=true;form.innerHTML='<p class="text-sm text-slate-500 mb-3">Your reply is visible only until this page reloads; no message is sent.</p><label for="review-reply" class="label">Your reply *</label><textarea id="review-reply" class="field" rows="4" maxlength="300" required></textarea><p id="reply-error" class="error" role="alert"></p><button type="submit" class="btn-primary mt-3">Add demo reply</button>';body.appendChild(form);form.onsubmit=e=>{e.preventDefault();const value=$("review-reply").value.trim();if(!value){$("reply-error").textContent="Write a reply before submitting.";return}r.reply=value;closeModal();renderReviews();notice("Demo reply added locally. No customer was contacted.")};$("review-reply").focus()})}
+  function renderAnalytics(){$("rating-distribution").innerHTML=mockData.distribution.map(([star,count])=>`<div class="flex items-center gap-3 mb-3 text-sm" aria-label="${star} stars: ${count} sample reviews"><span class="w-8">${star} ★</span><div class="bar flex-1"><span style="width:${count/24*100}%"></span></div><span class="w-5 text-right">${count}</span></div>`).join("");$("weekly-bars").innerHTML=mockData.weekly.map(([day,count])=>`<div class="grid grid-cols-[42px_1fr_35px] gap-3 items-center text-sm" aria-label="${day}: ${count} sample requests"><strong>${day}</strong><div class="bar"><span style="width:${count/8*100}%;background:#2563eb"></span></div><span>${count}</span></div>`).join("")}
+  updateFilter();initProfile();initNav();renderDays();renderOverview();renderRequests();renderReviews();renderAnalytics();lucide.createIcons();
+})();
+</script>
+ 
+</body></html>
